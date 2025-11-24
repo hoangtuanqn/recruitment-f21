@@ -5,6 +5,7 @@ import { HTTP_STATUS } from "~/constants/httpStatus";
 import candidateService from "~/services/candidate.service";
 import { GetAllRequestQuery } from "~/models/requests/candidate.request";
 import ExcelJS from "exceljs";
+import GenerateFileExcel from "~/utils/worksheet";
 export const create = async (req: Request<ParamsDictionary, any, any>, res: Response, next: NextFunction) => {
     try {
         const filePath = req.file?.path ?? null;
@@ -31,16 +32,8 @@ export const getAll = async (req: Request, res: Response, next: NextFunction) =>
     }
 };
 export const exportExcel = async (req: Request, res: Response, next: NextFunction) => {
-    // 1. Khởi tạo Workbook
-    const workbook = new ExcelJS.Workbook();
-    workbook.created = new Date();
-    workbook.modified = new Date();
-
-    // 2. Thêm một Worksheet (Sheet) mới
-    const worksheet = workbook.addWorksheet("Candidates");
-
-    // 3. Định nghĩa tiêu đề cột (Columns)
-    worksheet.columns = [
+    const workbook = new GenerateFileExcel("Candidates");
+    workbook.setupColumns([
         { header: "STT", key: "id", width: 5 },
         { header: "Last Name", key: "name", width: 30 },
         { header: "First Name", key: "age", width: 10 },
@@ -48,24 +41,18 @@ export const exportExcel = async (req: Request, res: Response, next: NextFunctio
         { header: "Email", key: "email", width: 40 },
         { header: "Student Code", key: "email", width: 40 },
         { header: "Major", key: "email", width: 40 },
-    ];
-
-    // 4. Thêm Dữ liệu (Rows)
-    const users = [
+    ]);
+    workbook.setupData([
         { id: 1, name: "Nguyễn Văn A", age: 28, email: "nguyenvana@example.com" },
         { id: 2, name: "Trần Thị B", age: 35, email: "tranb@example.com" },
         { id: 3, name: "Lê Văn C", age: 22, email: "levanc@example.com" },
-    ];
+    ]);
 
-    worksheet.addRows(users);
-
-    // 5. Cài đặt Header HTTP cho file Excel
-    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", "attachment; filename=" + "DuLieuNguoiDung.xlsx");
+    workbook.setHeader(res);
 
     // 6. Ghi Workbook vào Response stream
     try {
-        await workbook.xlsx.write(res);
+        await workbook.execute(res);
         res.end();
         console.log("File Excel đã được gửi thành công.");
     } catch (error) {
