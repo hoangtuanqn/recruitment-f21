@@ -1,90 +1,105 @@
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { FaUser } from "react-icons/fa";
-import { HiEye } from "react-icons/hi";
-import { showAlert } from "../../utils/functions";
-import { BsEyeSlashFill } from "react-icons/bs";
 import { Button } from "~/components/ui/button";
-import { Link } from "react-router-dom";
-
-const Login = () => {
-    const [data, setData] = useState({
-        username: "",
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
+import { Input } from "~/components/ui/input";
+import Swal from "sweetalert2";
+import Auth from "~/api-requests/auth";
+import Logo from "~/components/Logo";
+import { useNavigate } from "react-router-dom";
+import type { LoginRequestType } from "~/types/auth.types";
+import axios from "axios";
+const LoginPage = () => {
+    const [info, setInfo] = useState({
+        email: "",
         password: "",
     });
-    const [isShowPasssword, setIsShowPasssword] = useState(false);
-    const handleChange = (e: any) => {
-        setData((data) => ({
-            ...data,
+    const navigate = useNavigate();
+    const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) =>
+        setInfo({
+            ...info,
             [e.target.name]: e.target.value,
-        }));
-    };
-    const handleSubmit = (e: any) => {
-        e.preventDefault();
-        // Demo
-        showAlert("success", "Đăng nhập thành công!");
+        });
+    const mutation = useMutation({
+        mutationFn: async (data: LoginRequestType) => {
+            const result = await Auth.login(data);
+            return result.data;
+        },
+        onSuccess: () => {
+            navigate("/");
+            Swal.fire({
+                title: "Good job!",
+                text: "Login successfully!",
+                icon: "success",
+            });
+        },
+        onError: (error) => {
+            if (axios.isAxiosError(error)) {
+                console.log(error);
 
-        // console.log("submit thành công");
-    };
-    const handleShowPassword = () => {
-        setIsShowPasssword((is) => !is);
+                Swal.fire({
+                    title: "Faild!",
+                    text: error.response?.data.message || "Incorrect login information!!",
+                    icon: "error",
+                });
+            }
+        },
+    });
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        mutation.mutate(info);
     };
     return (
-        <>
-            <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-                <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-800">Tài Khoản</label>
-                    <div className="relative flex items-center">
-                        <input
-                            name="username"
-                            type="text"
-                            onChange={handleChange}
-                            value={data?.username}
-                            required
-                            className="outline-primary w-full rounded-md border border-slate-300 px-4 py-2.5 pr-10 text-sm text-slate-800"
-                            placeholder="Tài khoản"
-                        />
-                        <FaUser className="ht-icon absolute right-4" />
+        <div className={"mx-auto max-w-xl"}>
+            <Card className="py-12 shadow-2xs">
+                <CardHeader>
+                    <div className="flex flex-col items-center">
+                        <Logo />
+                        <CardTitle className="text-center text-2xl">Login to your account</CardTitle>
                     </div>
-                </div>
-
-                <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-800">Mật Khẩu</label>
-                    <div className="relative flex items-center">
-                        <input
-                            name="password"
-                            type={isShowPasssword ? "text" : "password"}
-                            onChange={handleChange}
-                            value={data?.password}
-                            required
-                            className="outline-primary w-full rounded-md border border-slate-300 px-4 py-3 pr-10 text-sm text-slate-800"
-                            placeholder="Mật khẩu của bạn"
-                        />
-                        {isShowPasssword ? (
-                            <BsEyeSlashFill
-                                className="ht-icon absolute right-4 cursor-pointer"
-                                onClick={handleShowPassword}
-                            />
-                        ) : (
-                            <HiEye className="ht-icon absolute right-4 cursor-pointer" onClick={handleShowPassword} />
-                        )}
-                    </div>
-                </div>
-                <div className="mt-5 flex flex-wrap items-center justify-end gap-4">
-                    <div className="text-sm">
-                        <Link to={"/"} className="ht-item-achor">
-                            Bạn Quên Mật Khẩu?
-                        </Link>
-                    </div>
-                </div>
-
-                <div className="mt-6">
-                    <Button variant={"primary"} type="submit" className="w-full">
-                        Đăng Nhập
-                    </Button>
-                </div>
-            </form>
-        </>
+                    <CardDescription className="text-center">
+                        F-CODE - F21 - <b className="font-bold">NEW WAVE</b>
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit}>
+                        <FieldGroup>
+                            <Field>
+                                <FieldLabel htmlFor="email">Email</FieldLabel>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    placeholder="example@gmail.com"
+                                    onChange={handleOnchange}
+                                    value={info.email}
+                                    required
+                                />
+                            </Field>
+                            <Field>
+                                <FieldLabel htmlFor="password">Password</FieldLabel>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    placeholder={"xxxx"}
+                                    name="password"
+                                    onChange={handleOnchange}
+                                    value={info.password}
+                                    required
+                                />
+                            </Field>
+                            <Field>
+                                <Button type="submit" variant={"default"}>
+                                    Login
+                                </Button>
+                            </Field>
+                        </FieldGroup>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
     );
 };
 
-export default Login;
+export default LoginPage;

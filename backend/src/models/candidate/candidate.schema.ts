@@ -12,3 +12,18 @@ export const getAllCandidateQuerySchema = z.object({
         page: toPositiveInt.default("1"),
     }),
 });
+
+export const confirmSendMailSchema = z.object({
+    body: z.object({
+        ids: z
+            .array(
+                z
+                    .string({
+                        required_error: "UUID is required",
+                        invalid_type_error: "UUID must be a string",
+                    })
+                    .uuid("Invalid UUID format"),
+            )
+            .min(1, "The 'ids' array must not be empty"), // Tùy chọn: Đảm bảo mảng không rỗng
+    }),
+});

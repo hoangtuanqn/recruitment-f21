@@ -1,18 +1,17 @@
-import { ExpiresInTokenType, TokenType } from "~/constants/enums";
+import { ExpiresInTokenType, TokenType, RoleType } from "~/constants/enums";
 import { HTTP_STATUS } from "~/constants/httpStatus";
 import { ErrorWithStatus } from "~/models/Error";
 import userRespository from "~/repositories/user.repository";
 import AlgoCrypoto from "~/utils/crypto";
 import AlgoJwt from "~/utils/jwt";
 import { LoginRequestBody, RegisterRequestBody } from "~/models/requests/user.request";
-import Helpers from "~/utils/helpers";
 import redisClient from "~/configs/redis";
-import prisma from "~/configs/prisma";
-import LoginLog from "~/schemas/log.schema";
+
+import logRepository from "~/repositories/log.repository";
 
 class AuthService {
     public create = async (data: RegisterRequestBody) => {
-        const { email, password } = data;
+        const { full_name, email, password, role } = data;
 
         const emailExisted = await userRespository.findByEmail(email);
         if (emailExisted) {
@@ -24,11 +23,13 @@ class AuthService {
 
         const passwordHash = await AlgoCrypoto.hashPassword(password);
         const result = await userRespository.create({
+            fullName: full_name,
             email,
             password: passwordHash,
+            role,
         });
 
-        return await this.signAccesAndRefreshToken(result.id);
+        return await this.signAccesAndRefreshToken(result.id, result.role as RoleType);
     };
 
     public login = async (data: LoginRequestBody) => {
@@ -40,33 +41,52 @@ class AuthService {
                 message: "Thông tin đăng nhập của bạn không hợp lệ!",
             });
         }
-        await this.writeLogs(email);
-        return await this.signAccesAndRefreshToken(accountExisted.id);
+        await logRepository.writeLogs(accountExisted.id, `Đã đăng nhập vào hệ thống!`);
+        return await this.signAccesAndRefreshToken(accountExisted.id, accountExisted.role as RoleType);
+    };
+
+    public me = async (id: string) => {
+        const user = await userRespository.findById(id);
+        if (!user) {
+            throw new ErrorWithStatus({
+                status: HTTP_STATUS.NOT_FOUND,
+                message: "Thông tin đăng nhập của bạn không hợp lệ!",
+            });
+        }
+        return user;
+    };
+    public getAll = async () => {
+        const result = await userRespository.getAll();
+        return result;
     };
 
     private signToken = ({
         userId,
         type,
         expiresIn = ExpiresInTokenType.AccessToken * 1000,
+        role,
     }: {
         userId: string;
         type: TokenType;
         expiresIn?: number;
+        role: RoleType;
     }) => {
         return AlgoJwt.signToken({
-            payload: { type, userId },
+            payload: { type, userId, role },
             options: { expiresIn: expiresIn * 1000 }, // convert seconds to mili seconds
         }) as Promise<string>;
     };
 
-    private signAccesAndRefreshToken = async (userId: string) => {
+    private signAccesAndRefreshToken = async (userId: string, role: RoleType) => {
         const [accessToken, refreshToken] = await Promise.all([
             this.signToken({
                 userId,
+                role,
                 type: TokenType.AccessToken,
             }),
             this.signToken({
                 userId,
+                role,
                 type: TokenType.RefreshToken,
                 expiresIn: ExpiresInTokenType.RefreshToken,
             }),
@@ -80,11 +100,6 @@ class AuthService {
             refresh_token: refreshToken,
         };
     };
-
-    private writeLogs = (email: string) =>
-        prisma.loginLog.create({
-            data: new LoginLog({ email }),
-        });
 }
 const authService = new AuthService();
 export default authService;

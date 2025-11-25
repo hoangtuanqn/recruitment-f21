@@ -10,9 +10,11 @@ const passwordSchema = z
 export const registerSchema = z.object({
     body: z
         .object({
+            full_name: z.string().trim().nonempty(),
             email: z.string().trim().email("Email không hợp lệ"),
             password: passwordSchema,
             confirm_password: z.string(),
+            role: z.enum(["VIEWER", "EDITOR", "ADMIN"]),
         })
         .refine((data) => data.password === data.confirm_password, {
             message: "Mật khẩu nhập lại không khớp",

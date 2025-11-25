@@ -1,32 +1,33 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { Suspense } from "react";
-import Loading from "./components/Loading";
-import UserLayout from "./layouts/UserLayout";
+import { Route, Routes } from "react-router-dom";
 import HomePage from "./pages/Home";
-import AuthenticationLayout from "./layouts/AuthenticationLayout";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-const queryClient = new QueryClient();
+import MainLayout from "./layouts/MainLayout";
+import LoginPage from "./pages/Login";
+import CreatePage from "./pages/Create";
+import LogPage from "./pages/Logs";
+import AccountPage from "./pages/Accounts";
+
 const App = () => {
     return (
-        <BrowserRouter>
-            <Suspense fallback={<Loading />}>
-                <QueryClientProvider client={queryClient}>
-                    <Routes>
-                        <Route path="/" element={<UserLayout />}>
-                            <Route index element={<HomePage />} />
-                            <Route path="/login" element={<AuthenticationLayout title="Đăng Nhập" page="login" />}>
-                                <Route index element={<Login />} />
-                            </Route>
-                            <Route path="/register" element={<AuthenticationLayout title="Đăng Ký" page="register" />}>
-                                <Route index element={<Register />} />
-                            </Route>
-                        </Route>
-                    </Routes>
-                </QueryClientProvider>
-            </Suspense>
-        </BrowserRouter>
+        <Routes>
+            <Route path="/" element={<MainLayout />}>
+                <Route index element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/create" element={<CreatePage />} />
+                <Route path="/logs" element={<LogPage />} />
+                <Route path="/accounts" element={<AccountPage />} />
+            </Route>
+
+            {/* <Route element={<AuthLayout />}>
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+            </Route>
+
+            <Route path="concerts">
+                <Route index element={<ConcertsHome />} />
+                <Route path=":city" element={<City />} />
+                <Route path="trending" element={<Trending />} />
+            </Route> */}
+        </Routes>
     );
 };
 

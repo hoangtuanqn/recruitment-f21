@@ -9,6 +9,8 @@ export interface CandidateType {
     phone: string;
     semester: string;
     studentCode: string;
+    note?: string;
+    isSendMail?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -23,6 +25,8 @@ class Candidate {
     phone: string;
     semester: string;
     studentCode: string;
+    note: string;
+    isSendMail: boolean;
     createdAt: Date;
     updatedAt: Date;
 
@@ -34,6 +38,8 @@ class Candidate {
         this.email = candidate.email;
         this.phone = candidate.phone;
         this.semester = candidate.semester;
+        this.note = candidate.note || "";
+        this.isSendMail = candidate.isSendMail || false;
         this.studentCode = candidate.studentCode;
         this.createdAt = candidate.createdAt || new Date();
         this.updatedAt = candidate.updatedAt || new Date();

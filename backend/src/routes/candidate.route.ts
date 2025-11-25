@@ -2,12 +2,21 @@ import { validate } from "~/utils/validation";
 import { Router } from "express";
 import multer from "multer";
 import * as candidateController from "~/controllers/candidates.controllers";
-import { getAllCandidateQuerySchema } from "~/models/candidate/candidate.schema";
+import { confirmSendMailSchema, getAllCandidateQuerySchema } from "~/models/candidate/candidate.schema";
+import { auth, isRole } from "~/middlewares/auth.middlewares";
 
 const candidateRouter = Router();
 const upload = multer({ dest: "uploads/" });
 // định nghĩa routing
-candidateRouter.get("/get-all", validate(getAllCandidateQuerySchema), candidateController.getAll);
-candidateRouter.post("/create", upload.single("file"), candidateController.create);
-candidateRouter.get("/export-excel", candidateController.exportExcel);
+candidateRouter.get("/stats", auth, candidateController.stats);
+candidateRouter.get("/get-all", auth, validate(getAllCandidateQuerySchema), candidateController.getAll);
+candidateRouter.post(
+    "/confirm-send-mail",
+    auth,
+    isRole(["ADMIN", "EDITOR"]),
+    validate(confirmSendMailSchema),
+    candidateController.confirmSendMail,
+);
+candidateRouter.post("/create", auth, isRole(["ADMIN"]), upload.single("file"), candidateController.create);
+candidateRouter.get("/export-excel", auth, isRole(["ADMIN", "EDITOR"]), candidateController.exportExcel);
 export default candidateRouter;

@@ -1,8 +1,10 @@
+import { omit } from "lodash";
 import prisma from "~/configs/prisma";
+import { RoleType } from "~/constants/enums";
 import User from "~/schemas/user.schema";
 
 class UserRepository {
-    create = async (data: { email: string; password: string }) => {
+    create = async (data: { fullName: string; email: string; password: string; role: RoleType }) => {
         const result = await prisma.user.create({
             data: new User(data),
         });
@@ -18,8 +20,17 @@ class UserRepository {
 
     findById = async (id: string) => {
         const result = await prisma.user.findUnique({
-            where: { id },
+            omit: {
+                password: true,
+            },
+            where: {
+                id,
+            },
         });
+        return result;
+    };
+    getAll = async () => {
+        const result = await prisma.user.findMany({ omit: { password: true } });
         return result;
     };
 

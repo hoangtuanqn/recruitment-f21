@@ -1,30 +1,85 @@
-import ExcelJS from "exceljs";
 import { HTTP_STATUS } from "~/constants/httpStatus";
 import { ErrorWithStatus } from "~/models/Error";
 import { RegisterRequestBody } from "~/models/requests/user.request";
 import Candidate, { CandidateType } from "~/schemas/candidate.schema";
 import Helpers from "~/utils/helpers";
 import fs from "fs";
-import candidateRepository from "~/repositories/candidate.";
+import candidateRepository from "~/repositories/candidate.repository";
+import prisma from "~/configs/prisma";
+import logRepository from "~/repositories/log.repository";
+import userRespository from "~/repositories/user.repository";
 
 class CandidateService {
-    public getAll = async (page: number, limit: number) => await candidateRepository.getCandidates(page, limit);
-    public handleRawData = async (data: RegisterRequestBody, filePath: string | null) => {
+    public getAll = async (page: number = 1, limit: number = 20) => {
+        const data = await candidateRepository.getCandidates(page, limit);
+
+        return data;
+    };
+    public handleRawData = async (userId: string, filePath: string | null) => {
         if (!filePath)
             throw new ErrorWithStatus({ status: HTTP_STATUS.BAD_REQUEST, message: "Vui lòng tải lên file DATA" });
-        const candidates = this.handleFileData(filePath);
+        const candidates = await this.handleFileData(userId, filePath);
         return candidateRepository.createMany(candidates);
     };
+    public confirmSendMail = async (userId: string, ids: string[]) => {
+        const user = await userRespository.findById(userId);
+        if (user) {
+            await candidateRepository.confirmSendMail(ids);
+            await logRepository.writeLogs(user.id, `Đã đăng nhập vào hệ thống!`);
+        } else {
+            throw new ErrorWithStatus({
+                status: HTTP_STATUS.NOT_FOUND,
+                message: "Người dùng không tồn tại trong hệ thống!",
+            });
+        }
+    };
+    public getCandidateStats = async () => {
+        // 1. Định nghĩa phạm vi thời gian cho Ngày hôm nay
+        const today = Helpers.getStartOfDay(new Date());
+        const tomorrow = Helpers.getNextDay(new Date());
 
-    public exportData = () => {
-       
+        // 2. Tính toán các chỉ số
+        const totalCount = await prisma.candidate.count();
+
+        const receivedMailCount = await prisma.candidate.count({
+            where: { isSendMail: true },
+        });
+
+        const candidatesCreatedToday = await prisma.candidate.count({
+            where: {
+                createdAt: {
+                    gte: today,
+                    lt: tomorrow,
+                },
+            },
+        });
+        const lastUpdatedCandidate = await prisma.candidate.findFirst({
+            orderBy: {
+                createdAt: "desc", // Sắp xếp giảm dần (mới nhất lên đầu)
+            },
+            select: {
+                createdAt: true,
+            },
+        });
+        return {
+            totalCandidates: totalCount,
+            receivedMailCount,
+            notReceivedMailCount: totalCount - receivedMailCount,
+            candidatesCreatedToday,
+            lastUpdatedCandidate: lastUpdatedCandidate?.createdAt,
+        };
     };
 
-    private handleFileData = (filePath: string): CandidateType[] => {
+    public exportData = () => {};
+
+    private handleFileData = async (userId: string, filePath: string) => {
+        console.log(userId);
+
         const candidates: CandidateType[] = [];
 
         try {
             const fileContent = fs.readFileSync(filePath, "utf8");
+
             const rawSplit = fileContent.split("\n");
             for (let item of rawSplit) {
                 const splitTab = item.split("\t");
@@ -43,11 +98,12 @@ class CandidateService {
                     }),
                 );
             }
+            await logRepository.writeLogs(userId, `Đã cập nhật dữ liệu mới nhất!`);
             return candidates;
         } catch (error) {
             throw new ErrorWithStatus({
                 status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-                message: "Không thể đọc được dữ liệu từ file",
+                message: "Không thể đọc được dữ liệu từ file" + error,
             });
         }
     };

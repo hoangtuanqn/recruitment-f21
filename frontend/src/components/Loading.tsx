@@ -3,8 +3,6 @@ import { ThreeDot } from "react-loading-indicators";
 
 const Loading = () => {
     useEffect(() => {
-        // Chặn scroll khi component mount
-
         if (window.innerWidth <= 1280) {
             document.body.style = "margin-right: 0px; overflow-y: hidden;";
         } else {
