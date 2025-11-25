@@ -23,6 +23,29 @@ class CandidateRepository {
         });
         return result;
     };
+    deleteMany = async (studentCodes: string[]) => {
+        const result = await prisma.candidate.deleteMany({
+            where: {
+                studentCode: {
+                    not: {
+                        in: studentCodes,
+                    },
+                },
+            },
+        });
+        return result;
+    };
+    updateCreatedAtFirst = async (studentCode: string) => {
+        const result = await prisma.candidate.update({
+            where: {
+                studentCode,
+            },
+            data: {
+                createdAt: new Date(),
+            },
+        });
+        return result;
+    };
     confirmSendMail = async (ids: string[]) => {
         const result = await prisma.candidate.updateMany({
             where: {

@@ -1,6 +1,5 @@
 import { HTTP_STATUS } from "~/constants/httpStatus";
 import { ErrorWithStatus } from "~/models/Error";
-import { RegisterRequestBody } from "~/models/requests/user.request";
 import Candidate, { CandidateType } from "~/schemas/candidate.schema";
 import Helpers from "~/utils/helpers";
 import fs from "fs";
@@ -19,7 +18,11 @@ class CandidateService {
         if (!filePath)
             throw new ErrorWithStatus({ status: HTTP_STATUS.BAD_REQUEST, message: "Vui lòng tải lên file DATA" });
         const candidates = await this.handleFileData(userId, filePath);
-        return candidateRepository.createMany(candidates);
+        const result = await candidateRepository.createMany(candidates);
+        const studentsCode = candidates.map((item) => item.studentCode);
+        await candidateRepository.deleteMany(studentsCode);
+        await candidateRepository.updateCreatedAtFirst(studentsCode[0]);
+        return result;
     };
     public confirmSendMail = async (userId: string, ids: string[]) => {
         const user = await userRespository.findById(userId);
@@ -39,7 +42,7 @@ class CandidateService {
         const tomorrow = Helpers.getNextDay(new Date());
 
         // 2. Tính toán các chỉ số
-        const totalCount = await prisma.candidate.count();
+        const record = await prisma.candidate.findMany();
 
         const receivedMailCount = await prisma.candidate.count({
             where: { isSendMail: true },
@@ -61,20 +64,41 @@ class CandidateService {
                 createdAt: true,
             },
         });
+
+        let groupMajor = (
+            await prisma.candidate.groupBy({
+                by: ["major"],
+                _count: {
+                    major: true,
+                },
+            })
+        ).map((item) => ({
+            major: item.major,
+            count: item._count.major,
+        }));
+
+        // tính theo khóa
+        const object: { [key: string]: number } = {};
+        record.forEach((item) => {
+            const ch = item.studentCode.substring(2, 4);
+            if (!object[ch]) object[ch] = 1;
+            else object[ch]++;
+        });
+
         return {
-            totalCandidates: totalCount,
+            totalCandidates: record.length,
             receivedMailCount,
-            notReceivedMailCount: totalCount - receivedMailCount,
+            notReceivedMailCount: record.length - receivedMailCount,
             candidatesCreatedToday,
             lastUpdatedCandidate: lastUpdatedCandidate?.createdAt,
+            groupMajor,
+            stats: object,
         };
     };
 
     public exportData = () => {};
 
     private handleFileData = async (userId: string, filePath: string) => {
-        console.log(userId);
-
         const candidates: CandidateType[] = [];
 
         try {

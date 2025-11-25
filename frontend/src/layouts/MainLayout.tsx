@@ -37,7 +37,7 @@ const MainLayout = () => {
             <section className="mt-20">
                 <Outlet />
             </section>
-            <section>footer</section>
+            <section>F-CODE</section>
         </section>
     );
 };

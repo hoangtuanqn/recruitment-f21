@@ -5,7 +5,7 @@ import { useAuth } from "~/hooks/use-auth";
 import { LogOut } from "lucide-react";
 
 const Header = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const location = useLocation();
 
     return (
@@ -24,7 +24,7 @@ const Header = () => {
                     </div>
                 )}
 
-                {user?.role !== "VIEWER" && (
+                {user?.role === "ADMIN" && (
                     <div className={`${location.pathname === "/accounts" && `font-bold`}`}>
                         <Link to="/accounts">Người dùng</Link>
                     </div>
@@ -35,7 +35,7 @@ const Header = () => {
                     <Button variant={"outline"} className="inline">
                         Welcome: {user.fullName} - {user.role}
                     </Button>
-                    <Button variant={"destructive"}>
+                    <Button variant={"destructive"} onClick={logout}>
                         <LogOut />
                     </Button>
                 </>

@@ -20,7 +20,13 @@ export const register = async (
         return next(error);
     }
 };
-
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    return res.json({
+        message: "Đã xóa cookie",
+    });
+};
 export const login = async (
     req: Request<ParamsDictionary, any, LoginRequestBody>,
     res: Response,

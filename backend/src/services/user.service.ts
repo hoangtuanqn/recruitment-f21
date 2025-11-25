@@ -5,7 +5,6 @@ import userRespository from "~/repositories/user.repository";
 import AlgoCrypoto from "~/utils/crypto";
 import AlgoJwt from "~/utils/jwt";
 import { LoginRequestBody, RegisterRequestBody } from "~/models/requests/user.request";
-import redisClient from "~/configs/redis";
 
 import logRepository from "~/repositories/log.repository";
 
@@ -26,7 +25,7 @@ class AuthService {
             fullName: full_name,
             email,
             password: passwordHash,
-            role,
+            role: role === "VIEWER" ? RoleType.VIEWER : RoleType.EDITOR,
         });
 
         return await this.signAccesAndRefreshToken(result.id, result.role as RoleType);
@@ -91,9 +90,6 @@ class AuthService {
                 expiresIn: ExpiresInTokenType.RefreshToken,
             }),
         ]);
-
-        // Lưu lại refresh token vào redis
-        await redisClient.set(`refreshToken:${userId}`, refreshToken, ExpiresInTokenType.RefreshToken);
 
         return {
             access_token: accessToken,

@@ -14,7 +14,6 @@ const Stats = () => {
         staleTime: 5 * 60 * 1000,
     });
     if (isLoading) return <Loading />;
-    console.log(data?.lastUpdatedCandidate);
 
     return (
         <>
@@ -46,8 +45,29 @@ const Stats = () => {
                     <span className="mt-2 inline-block text-4xl font-bold">{data?.candidatesCreatedToday}</span>
                 </div>
             </section>
+            <section>
+                <div className="mb-5">
+                    <h4 className="font-bold">Khóa: </h4>
+                    <ul className="flex gap-5">
+                        {Object.keys(data?.stats || {}).map((item) => (
+                            <li className="text-sm">
+                                K{item}: <span className="text-gray-500 italic">{data?.stats[item]} ứng viên</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                <h4 className="font-bold">Chuyên ngành: </h4>
+                <ul className="flex flex-wrap gap-5">
+                    {data?.groupMajor.map((item) => (
+                        <li className="text-sm">
+                            {item.major}: <span className="text-gray-500 italic">{item.count} ứng viên</span>
+                        </li>
+                    ))}
+                </ul>
+            </section>
             <h3 className="mt-10 ml-1 text-center text-lg font-bold">
-                DỮ LIỆU CẬP NHẬT LẦN CUỐI:{" "}
+                CẬP NHẬT DỮ LIỆU LẦN CUỐI:{" "}
                 <span className="text-gray-600/80 italic">
                     {Helper.formatTimeAgo(data?.lastUpdatedCandidate || "")}
                 </span>

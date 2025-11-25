@@ -1,27 +1,27 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "target": "ES2023",
-    "strict": true,
+    // Phiên bản JavaScript mục tiêu, tương thích tốt với Node.js hiện đại
+    "target": "ES2022",
+    // 👈 QUAN TRỌNG: Chỉ định output là CommonJS
+    "module": "CommonJS",
+    // Tắt kiểm tra chặt chẽ giữa các module CommonJS và ES
     "esModuleInterop": true,
-    "ignoreDeprecations": "6.0",
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strict": true,
     "rootDir": "src",
     "outDir": "dist",
     "baseUrl": ".",
     "paths": {
       "~/*": [
         "src/*"
-      ] // Đường dẫn tương đối cho các import (alias)
-    },
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "strict": true
+      ]
+    }
   },
   "include": [
     "src"
   ],
   "files": [
     "src/type.d.ts"
-  ], // Các file dùng để defined global type cho dự án
+  ]
 }

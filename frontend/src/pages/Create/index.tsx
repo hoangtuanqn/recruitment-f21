@@ -136,8 +136,6 @@ const CreatePage = () => {
                                     onValueChange={(value) => setInfo({ ...info, role: value })}
                                 >
                                     <SelectTrigger className="w-[180px]" id="role_select">
-                                        {" "}
-                                        {/* Tùy chọn: đặt ID nếu muốn FieldLabel hoạt động */}
                                         <SelectValue placeholder="Select role" />
                                     </SelectTrigger>
                                     <SelectContent>

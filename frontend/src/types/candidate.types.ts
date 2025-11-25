@@ -30,5 +30,12 @@ export interface CandidateStatsType {
         notReceivedMailCount: number;
         candidatesCreatedToday: number;
         lastUpdatedCandidate: string;
+        groupMajor: {
+            major: string;
+            count: number;
+        }[];
+        stats: {
+            [key: string]: number;
+        };
     };
 }

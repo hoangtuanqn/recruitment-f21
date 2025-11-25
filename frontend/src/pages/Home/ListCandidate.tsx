@@ -9,17 +9,25 @@ import Loading from "~/components/Loading";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import { useAuth } from "~/hooks/use-auth";
-
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "~/components/ui/select";
 const columns = ["Student Code", "First Name", "Last Name", "Major", "Infomation", "Semester", "Action"];
 const ListCandidate = () => {
     const queryClient = useQueryClient();
+    const [limit, setLimit] = useState(20);
     const [selected, setSelected] = useState<string[]>([]);
     const [page, setPage] = useState(1);
     const { data, isLoading, refetch } = useQuery({
-        queryKey: ["candidate", page],
-
+        queryKey: ["candidate", page, limit],
         queryFn: async () => {
-            const result = await Candidate.getAll(page);
+            const result = await Candidate.getAll(page, limit);
             return result.data;
         },
         staleTime: 5 * 60 * 1000,
@@ -81,6 +89,7 @@ const ListCandidate = () => {
             return;
         }
         setPage(page);
+        setSelected([]);
     };
 
     if (isLoading) return <Loading />;
@@ -108,7 +117,10 @@ const ListCandidate = () => {
                                 Xác nhận đã gửi email ({selected.length})
                             </Button>
 
-                            <Link to={"/"} target="_blank">
+                            <Link
+                                to={`${import.meta.env.VITE_API_URL}/candidate/export-excel?page=${page}&limit=${limit}`}
+                                target="_blank"
+                            >
                                 <Button className="text-xs italic">Export excel ({candidates?.length || 0})</Button>
                             </Link>
                         </>
@@ -116,6 +128,22 @@ const ListCandidate = () => {
                 </div>
 
                 <div className="flex gap-1">
+                    <Select defaultValue={String(limit)} onValueChange={(value) => setLimit(+value)}>
+                        <SelectTrigger className="mr-5 w-[180px]" defaultValue={limit}>
+                            <SelectValue placeholder="Record number" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>Record</SelectLabel>
+                                <SelectItem value="20">20</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                                {(meta?.total || 0) > 100 && (
+                                    <SelectItem value="1000000">Full ({meta?.total})</SelectItem>
+                                )}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                     <Button
                         variant={"outline"}
                         className="border"
@@ -142,6 +170,9 @@ const ListCandidate = () => {
                                 <Checkbox
                                     className="cursor-pointer"
                                     onClick={handleSelectAll}
+                                    checked={
+                                        selected.length > 0 && selected.length === candidateNotReceivedMail?.length
+                                    }
                                     disabled={candidateNotReceivedMail?.length === 0}
                                 />
                             </th>
@@ -196,7 +227,7 @@ const ListCandidate = () => {
                                             <li>Mail: {item.email || "Đã ẩn"}</li>
                                             <li>Phone: {item.phone || "Đã ẩn"}</li>
                                             <li>
-                                                Trạng thái:{" "}
+                                                Tình trạng:{" "}
                                                 {item.isSendMail ? (
                                                     <span className="text-green-600">Đã gửi mail</span>
                                                 ) : (
@@ -216,7 +247,11 @@ const ListCandidate = () => {
                                     {/* <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
                                         {item.semester}
                                     </p> */}
-                                    <Button variant={"link"} className="rounded-xl border">
+                                    <Button
+                                        variant={"link"}
+                                        className="rounded-xl border"
+                                        onClick={() => alert("Để cho đẹp thôi, hehe!")}
+                                    >
                                         <NotebookPen />
                                     </Button>
                                     {item.note && <p className="mt-1 text-xs text-emerald-500">Có ghi chú</p>}
