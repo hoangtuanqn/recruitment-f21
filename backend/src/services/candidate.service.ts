@@ -10,6 +10,7 @@ import userRespository from "~/repositories/user.repository";
 import redisClient from "~/configs/redis";
 import emailService from "./email.service";
 import emailTemplateRepository from "~/repositories/email-template.repository";
+import { EmailTemplateType } from "~/schemas/email-tempate";
 
 class CandidateService {
     public getAll = async (page: number = 1, limit: number = 20) => {
@@ -100,6 +101,38 @@ class CandidateService {
     };
 
     public sendMail = async () => {
+        const infoTemplate = await this.getTemplateSendEmail();
+        const emails = await this.getInfoCandidates(infoTemplate as EmailTemplateType);
+
+        const emailLocked = await this.attemptBatchLock(Object.keys(emails));
+
+        const promises: Promise<void>[] = [];
+        for (let email of emailLocked) {
+            console.log("emails[email].data", emails[email].data);
+
+            promises.push(emailService.sendMail(email, emails[email].data, { subject: infoTemplate.subject! }));
+        }
+        const results = await Promise.allSettled(promises);
+
+        const emailSendedSs: string[] = [],
+            unlockPromises: Promise<any>[] = [];
+
+        results.forEach((result, index) => {
+            const email = emailLocked[index];
+            const lockKey = `lock:${email}`;
+            if (result.status === "fulfilled") {
+                emailSendedSs.push(email);
+            } else {
+                const reason = result.reason as any;
+                console.error(`Gửi thất bại đến ${email}. Lỗi:`, reason?.message || reason);
+            }
+            unlockPromises.push(redisClient.del(lockKey));
+        });
+        await Promise.allSettled([...unlockPromises, candidateRepository.updateStatusSendMail(emailSendedSs)]);
+        console.log("Đã xử lý hoàn tất!");
+    };
+
+    private getTemplateSendEmail = async () => {
         const infoTemplate = await emailTemplateRepository.getTemplateActive();
         if (!infoTemplate) {
             throw new ErrorWithStatus({
@@ -107,6 +140,10 @@ class CandidateService {
                 message: "Không tìm thấy template nào đang hoạt động"!,
             });
         }
+        return infoTemplate;
+    };
+
+    private getInfoCandidates = async (infoTemplate: EmailTemplateType) => {
         const emails = await (async function () {
             const emailAndInfo: { [key: string]: any } = {};
             const infoCandidate = await candidateRepository.getAnyEmail(15);
@@ -141,33 +178,7 @@ class CandidateService {
             });
             return emailAndInfo;
         })();
-
-        const emailLocked = await this.attemptBatchLock(Object.keys(emails));
-
-        const promises: Promise<void>[] = [];
-        for (let email of emailLocked) {
-            console.log("emails[email].data", emails[email].data);
-
-            promises.push(emailService.sendMail(email, emails[email].data, { subject: infoTemplate.subject! }));
-        }
-        const results = await Promise.allSettled(promises);
-
-        const emailSendedSs: string[] = [],
-            unlockPromises: Promise<any>[] = [];
-
-        results.forEach((result, index) => {
-            const email = emailLocked[index];
-            const lockKey = `lock:${email}`;
-            if (result.status === "fulfilled") {
-                emailSendedSs.push(email);
-            } else {
-                const reason = result.reason as any;
-                console.error(`Gửi thất bại đến ${email}. Lỗi:`, reason?.message || reason);
-            }
-            unlockPromises.push(redisClient.del(lockKey));
-        });
-        await Promise.allSettled([...unlockPromises, candidateRepository.updateStatusSendMail(emailSendedSs)]);
-        console.log("Đã xử lý hoàn tất!");
+        return emails;
     };
 
     private attemptBatchLock = async (emails: string[]) => {
