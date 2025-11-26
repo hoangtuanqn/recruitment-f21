@@ -7,11 +7,12 @@ import cors from "cors";
 import candidateRouter from "./routes/candidate.route";
 import cookieParser from "cookie-parser";
 import logRouter from "./routes/log.route";
+import "./configs/env";
 const app = express();
 const PORT = process.env.PORT || 8000;
 app.use(
     cors({
-        origin: process.env.NODE_ENV === "development" ? "http://localhost:5173" : "https://recruit.htuanqn.id.vn",
+        origin: process.env.NODE_ENV === "development" ? "http://localhost:5173" : process.env.CLIENT_URL,
         credentials: true,
     }),
 );

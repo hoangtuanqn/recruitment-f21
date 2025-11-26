@@ -1,12 +1,15 @@
+import fs from "fs";
 import { HTTP_STATUS } from "~/constants/httpStatus";
 import { ErrorWithStatus } from "~/models/Error";
 import Candidate, { CandidateType } from "~/schemas/candidate.schema";
 import Helpers from "~/utils/helpers";
-import fs from "fs";
 import candidateRepository from "~/repositories/candidate.repository";
 import prisma from "~/configs/prisma";
 import logRepository from "~/repositories/log.repository";
 import userRespository from "~/repositories/user.repository";
+import redisClient from "~/configs/redis";
+import emailService from "./email.service";
+import emailTemplateRepository from "~/repositories/email-template.repository";
 
 class CandidateService {
     public getAll = async (page: number = 1, limit: number = 20) => {
@@ -96,7 +99,88 @@ class CandidateService {
         };
     };
 
-    public exportData = () => {};
+    public sendMail = async () => {
+        const infoTemplate = await emailTemplateRepository.getTemplateActive();
+        if (!infoTemplate) {
+            throw new ErrorWithStatus({
+                status: HTTP_STATUS.NOT_FOUND,
+                message: "Không tìm thấy template nào đang hoạt động"!,
+            });
+        }
+        const emails = await (async function () {
+            const emailAndInfo: { [key: string]: any } = {};
+            const infoCandidate = await candidateRepository.getAnyEmail(15);
+
+            infoCandidate.map((item) => item.email);
+            infoCandidate.forEach((candi) => {
+                const regex = /\{\{(.*?)\}\}/;
+                const info: Record<string, any> = {};
+                const valuesObject = infoTemplate.values as Record<string, any>;
+                info.email = candi.email;
+                info.data = valuesObject.reduce((acc: Record<string, any>, currentItem: Record<string, any>) => {
+                    const key = Object.keys(currentItem)[0].match(regex)?.[1] as string;
+                    console.log(key);
+
+                    const valueOfKey = currentItem[`{{${key}}}`];
+                    let value = valueOfKey;
+
+                    if (valueOfKey === "@@fullName") {
+                        value = candi.lastName + " " + candi.firstName;
+                    } else if (valueOfKey === "@@email") {
+                        value = candi.email;
+                    } else if (valueOfKey === "@@phone") {
+                        value = candi.phone;
+                    }
+
+                    return {
+                        ...acc,
+                        [key]: value,
+                    };
+                }, {});
+                emailAndInfo[candi.email] = info;
+            });
+            return emailAndInfo;
+        })();
+
+        const emailLocked = await this.attemptBatchLock(Object.keys(emails));
+
+        const promises: Promise<void>[] = [];
+        for (let email of emailLocked) {
+            console.log("emails[email].data", emails[email].data);
+
+            promises.push(emailService.sendMail(email, emails[email].data, { subject: infoTemplate.subject! }));
+        }
+        const results = await Promise.allSettled(promises);
+
+        const emailSendedSs: string[] = [],
+            unlockPromises: Promise<any>[] = [];
+
+        results.forEach((result, index) => {
+            const email = emailLocked[index];
+            const lockKey = `lock:${email}`;
+            if (result.status === "fulfilled") {
+                emailSendedSs.push(email);
+            } else {
+                const reason = result.reason as any;
+                console.error(`Gửi thất bại đến ${email}. Lỗi:`, reason?.message || reason);
+            }
+            unlockPromises.push(redisClient.del(lockKey));
+        });
+        await Promise.allSettled([...unlockPromises, candidateRepository.updateStatusSendMail(emailSendedSs)]);
+        console.log("Đã xử lý hoàn tất!");
+    };
+
+    private attemptBatchLock = async (emails: string[]) => {
+        const lockPromises = emails.map((email) =>
+            redisClient.set(`lock:${email}`, "1", "EX", 3600, "NX").then((result) => ({
+                email,
+                locked: result === "OK",
+            })),
+        );
+        const lockResults = await Promise.all(lockPromises);
+        const successfullyLockedEmails = lockResults.filter((r) => r.locked).map((r) => r.email);
+        return successfullyLockedEmails;
+    };
 
     private handleFileData = async (userId: string, filePath: string) => {
         const candidates: CandidateType[] = [];

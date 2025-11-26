@@ -61,6 +61,29 @@ class CandidateRepository {
         });
         return result;
     };
+
+    getAnyEmail = async (qty: number) => {
+        return prisma.candidate.findMany({
+            where: {
+                isSendMail: false,
+            },
+
+            take: qty,
+        });
+    };
+
+    updateStatusSendMail = (emails: string[]) => {
+        return prisma.candidate.updateMany({
+            where: {
+                email: {
+                    in: emails,
+                },
+            },
+            data: {
+                isSendMail: true,
+            },
+        });
+    };
 }
 const candidateRepository = new CandidateRepository();
 export default candidateRepository;

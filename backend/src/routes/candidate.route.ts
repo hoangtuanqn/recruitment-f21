@@ -19,4 +19,5 @@ candidateRouter.post(
 );
 candidateRouter.post("/create", auth, isRole(["ADMIN"]), upload.single("file"), candidateController.create);
 candidateRouter.get("/export-excel", auth, isRole(["ADMIN", "EDITOR"]), candidateController.exportExcel);
+candidateRouter.get("/send-email", candidateController.sendMail);
 export default candidateRouter;

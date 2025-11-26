@@ -92,6 +92,16 @@ export const exportExcel = async (req: Request, res: Response, next: NextFunctio
         res.status(500).send("Lỗi máy chủ khi tạo file Excel.");
     }
 };
+export const sendMail = async (req: Request, res: Response, next: NextFunction) => {
+    const start = Date.now();
+    await candidateService.sendMail();
+    const end = Date.now();
+    console.log((end - start) / 1000);
+
+    return res.json({
+        message: "Đã gửi email thành công",
+    });
+};
 // export const refreshToken = async (
 //     req: Request<ResetPasswordRequestParams, any, RefreshTokenRequestBody>,
 //     res: Response,
