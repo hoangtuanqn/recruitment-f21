@@ -103,6 +103,7 @@ const EditTemplate = () => {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             setTemplateFile(e.target.files[0]);
+            console.log("e.target.files[0]", e.target.files[0]);
         } else {
             setTemplateFile(null);
         }

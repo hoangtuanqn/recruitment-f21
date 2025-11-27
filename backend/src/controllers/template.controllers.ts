@@ -31,7 +31,7 @@ export const getDetail = async (req: Request<{ id: string }>, res: Response, nex
         return next(error);
     }
 };
-export const create = async (
+export const testSendMail = async (
     req: Request<ParamsDictionary, any, TestSendMailRequest>,
     res: Response,
     next: NextFunction,
@@ -52,19 +52,23 @@ export const update = async (
     next: NextFunction,
 ) => {
     const { id } = req.params;
-    console.log(req.body);
+    const fileName = req.file?.filename || "";
+
+    console.log(req.body); // undefined
 
     try {
-        const result = await templateService.update(id, req.body);
+        const result = await templateService.update(id, req.body, fileName);
         return res.status(HTTP_STATUS.OK).json({
             message: "Đã cập nhật thành công!",
             result,
         });
     } catch (error) {
+        console.log(error);
+
         return next(error);
     }
 };
-export const testSendMail = async (
+export const create = async (
     req: Request<ParamsDictionary, any, TemplateUploadPayload>,
     res: Response,
     next: NextFunction,
@@ -79,6 +83,36 @@ export const testSendMail = async (
     } catch (error) {
         const filePath = path.join(__dirname, "..", "..", "uploads", "templates", req.file?.filename || "");
         fs.unlinkSync(filePath);
+        return next(error);
+    }
+};
+export const checkStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await templateService.checkStatusSendMail();
+        return res.status(HTTP_STATUS.OK).json({
+            message: "Kiểm tra trạng thái thành công!",
+            result,
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
+
+export const changeStatus = async (
+    req: Request<ParamsDictionary, any, { status: boolean }>,
+    res: Response,
+    next: NextFunction,
+) => {
+    const { status } = req.body;
+    console.log(status);
+
+    try {
+        const result = await templateService.changeStatusSendEmail(status);
+        return res.status(HTTP_STATUS.OK).json({
+            message: "Cập nhật trạng thái thành công!",
+            result,
+        });
+    } catch (error) {
         return next(error);
     }
 };

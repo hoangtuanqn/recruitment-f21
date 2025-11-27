@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bug, Eye, Pencil } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -7,24 +7,56 @@ import Template from "~/api-requests/template";
 import Loading from "~/components/Loading";
 import { TemplatePopup } from "~/components/TemplatePopup";
 import { Button } from "~/components/ui/button";
+import { Label } from "~/components/ui/label";
+import { Switch } from "~/components/ui/switch";
 import type { TemplateType } from "~/types/template.types";
+
+interface StatusResponse {
+    result: boolean;
+}
 
 const columns = ["Tên gợi nhớ", "Subject", "Tham số", "Trạng thái", "Action"];
 const TemplatesPage = () => {
     const [open, setOpen] = useState(false);
     const [itemTest, setItemTest] = useState<TemplateType>();
-    const { data, isLoading } = useQuery({
-        queryKey: ["templates"],
 
+    const queryClient = useQueryClient();
+
+    const { data, isLoading: isTemplatesLoading } = useQuery({
+        queryKey: ["templates"],
         queryFn: async () => {
             const result = await Template.getAll();
             return result.data;
         },
     });
 
+    const { data: globalStatusData, isLoading: isStatusLoading } = useQuery({
+        queryKey: ["globalStatus"],
+        queryFn: async () => {
+            const result = await Template.getStatus();
+            return result.data.result;
+        },
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const isActivated = globalStatusData ?? false;
+
+    const { mutate: changeStatusMutate, isPending: isChangingStatus } = useMutation({
+        mutationFn: async (newStatus: boolean) => {
+            await Template.changeStatus(newStatus);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["globalStatus"] });
+            console.log("Trạng thái kích hoạt gửi mail tự động đã được thay đổi thành công.");
+        },
+        onError: (error) => {
+            console.error("Lỗi khi thay đổi trạng thái:", error);
+        },
+    });
+
     const accounts = data?.result;
 
-    if (isLoading) return <Loading />;
+    if (isTemplatesLoading || isStatusLoading) return <Loading />;
 
     const handleTest = (item: TemplateType) => {
         setOpen(true);
@@ -32,9 +64,29 @@ const TemplatesPage = () => {
         console.log(item);
     };
 
+    const handleToggleGlobalStatus = (newChecked: boolean) => {
+        if (newChecked) {
+            if (!confirm("Bạn đã test trước khi kích hoạt send mail chưa?")) {
+                return;
+            }
+        }
+        changeStatusMutate(newChecked);
+    };
+
     return (
         <>
             {itemTest && <TemplatePopup open={open} setOpen={setOpen} itemTest={itemTest} />}
+            <div className="my-5 flex items-center justify-center space-x-2">
+                <Switch
+                    id="global-mail-switch"
+                    checked={isActivated}
+                    onCheckedChange={handleToggleGlobalStatus}
+                    disabled={isChangingStatus}
+                />
+                <Label htmlFor="global-mail-switch" className={isChangingStatus ? "opacity-50 transition-opacity" : ""}>
+                    {isChangingStatus ? "Đang cập nhật trạng thái..." : "Kích hoạt gửi mail tự động"}
+                </Label>
+            </div>
             <Link to="/add-template">
                 <Button variant={"default"}>Thêm template</Button>
             </Link>
@@ -43,7 +95,7 @@ const TemplatesPage = () => {
                     <thead>
                         <tr className="">
                             {columns.map((column) => (
-                                <th className="border-blue-gray-100 bg-blue-gray-50 border-b p-4">
+                                <th key={column} className="border-blue-gray-100 bg-blue-gray-50 border-b p-4">
                                     <p className="text-blue-gray-900 block font-sans text-sm leading-none font-bold antialiased">
                                         {column}
                                     </p>
@@ -57,7 +109,7 @@ const TemplatesPage = () => {
                     </thead>
                     <tbody>
                         {accounts?.map((item) => (
-                            <tr>
+                            <tr key={item.id}>
                                 <td className="border-blue-gray-50 border-b p-4">
                                     <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
                                         {item.name}

@@ -23,6 +23,7 @@ class EmailTemplateRepository {
         return prisma.emailTemplate.findMany();
     };
     create = async (data: TemplateCreateType) => {
+        console.log("có path name", data.path_name);
         return prisma.emailTemplate.create({
             data: new EmailTemplate({
                 name: data.name,
@@ -39,7 +40,7 @@ class EmailTemplateRepository {
             where: { id },
         });
     };
-    update = async (id: string, payload: any) => {
+    update = async (id: string, payload: any, fileName: string) => {
         return prisma.emailTemplate.update({
             where: { id },
             data: {
@@ -47,6 +48,22 @@ class EmailTemplateRepository {
                 subject: payload.subject,
                 values: payload.parameters,
                 status: payload.status === "1",
+                pathName: fileName,
+            },
+        });
+    };
+
+    changeStatus = async (status: boolean) => {
+        return prisma.settings.upsert({
+            where: {
+                name: "send_mail_auto",
+            },
+            update: {
+                value: status ? "1" : "0",
+            },
+            create: {
+                name: "send_mail_auto",
+                value: status ? "1" : "0",
             },
         });
     };

@@ -2,7 +2,7 @@ import { Router } from "express";
 import * as templateController from "~/controllers/template.controllers";
 import { auth, isRole } from "~/middlewares/auth.middlewares";
 import upload from "~/middlewares/multer";
-import { templateAddSchema, templateEditSchema, testSendMailSchema } from "~/models/rules/template.schema";
+import { testSendMailSchema } from "~/models/rules/template.schema";
 import { validate } from "~/utils/validation";
 
 const templateRouter = Router();
@@ -13,17 +13,19 @@ templateRouter.post(
     "/create",
     auth,
     isRole(["ADMIN"]),
-    validate(templateAddSchema),
+    // validate(templateAddSchema),
     upload("/templates").single("file"),
     templateController.create,
 );
-templateRouter.patch("/:id", auth, isRole(["ADMIN"]), validate(templateEditSchema), templateController.update);
+templateRouter.get("/check-status", auth, isRole(["ADMIN"]), templateController.checkStatus);
+templateRouter.post("/change-status", auth, isRole(["ADMIN"]), templateController.changeStatus);
 templateRouter.post(
     "/test-send-mail",
     auth,
     isRole(["ADMIN"]),
     validate(testSendMailSchema),
-    templateController.create,
+    templateController.testSendMail,
 );
+templateRouter.post("/:id", auth, isRole(["ADMIN"]), upload("/templates").single("file"), templateController.update);
 
 export default templateRouter;
