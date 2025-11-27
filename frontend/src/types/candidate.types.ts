@@ -37,5 +37,6 @@ export interface CandidateStatsType {
         stats: {
             [key: string]: number;
         };
+        auto_send_mail: boolean;
     };
 }

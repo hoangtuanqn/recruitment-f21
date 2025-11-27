@@ -25,9 +25,14 @@ const Header = () => {
                 )}
 
                 {user?.role === "ADMIN" && (
-                    <div className={`${location.pathname === "/accounts" && `font-bold`}`}>
-                        <Link to="/accounts">Người dùng</Link>
-                    </div>
+                    <>
+                        <div className={`${location.pathname === "/accounts" && `font-bold`}`}>
+                            <Link to="/accounts">Người dùng</Link>
+                        </div>
+                        <div className={`${location.pathname === "/templates" && `font-bold`}`}>
+                            <Link to="/templates">Thiết lập template</Link>
+                        </div>
+                    </>
                 )}
             </div>
             {user ? (

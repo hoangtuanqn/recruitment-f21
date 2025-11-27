@@ -3,6 +3,8 @@ import { v7 as uuidv7 } from "uuid";
 export interface EmailTemplateType {
     id?: string;
     name: string;
+    pathName: string;
+
     subject: string;
     values: { [key: string]: any };
     status?: boolean;
@@ -14,6 +16,7 @@ export interface EmailTemplateType {
 class EmailTemplate {
     id: string;
     name: string;
+    pathName: string;
     subject: string;
     values: { [key: string]: any };
     status: boolean;
@@ -22,6 +25,7 @@ class EmailTemplate {
     constructor(tempate: EmailTemplateType) {
         this.id = tempate.id || uuidv7();
         this.name = tempate.name;
+        this.pathName = tempate.pathName;
         this.subject = tempate.subject;
         this.values = tempate.values;
         this.status = tempate.status || false;

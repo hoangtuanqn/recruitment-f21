@@ -31,8 +31,6 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
     }
 };
 export const isRole = (roles: string[]) => async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.role);
-    
     if (roles.includes(req.role as string)) {
         next();
     } else {

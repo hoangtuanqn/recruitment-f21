@@ -66,12 +66,19 @@ const Stats = () => {
                     ))}
                 </ul>
             </section>
-            <h3 className="mt-10 ml-1 text-center text-lg font-bold">
-                CẬP NHẬT DỮ LIỆU LẦN CUỐI:{" "}
+            <div className="flex flex-col items-center">
+                <h3 className="mt-10 ml-1 text-lg font-bold">
+                    CẬP NHẬT DỮ LIỆU LẦN CUỐI:{" "}
                 <span className="text-gray-600/80 italic">
-                    {Helper.formatTimeAgo(data?.lastUpdatedCandidate || "")}
-                </span>
-            </h3>
+                        {Helper.formatTimeAgo(data?.lastUpdatedCandidate || "")}
+                    </span>
+                </h3>
+                {data?.auto_send_mail ? (
+                    <span className="text-center font-bold text-green-500 italic">Send mail đang kích hoạt!</span>
+                ) : (
+                    <span className="text-center font-bold text-red-500 italic">Tính năng send mail đang tắt</span>
+                )}
+            </div>
         </>
     );
 };

@@ -11,6 +11,7 @@ import redisClient from "~/configs/redis";
 import emailService from "./email.service";
 import emailTemplateRepository from "~/repositories/email-template.repository";
 import { EmailTemplateType } from "~/schemas/email-tempate";
+import settingRepository from "~/repositories/setting.repository";
 
 class CandidateService {
     public getAll = async (page: number = 1, limit: number = 20) => {
@@ -97,6 +98,7 @@ class CandidateService {
             lastUpdatedCandidate: lastUpdatedCandidate?.createdAt,
             groupMajor,
             stats: object,
+            auto_send_mail: (await settingRepository.get("send_mail_auto"))?.value === "1",
         };
     };
 
@@ -108,8 +110,6 @@ class CandidateService {
 
         const promises: Promise<void>[] = [];
         for (let email of emailLocked) {
-            console.log("emails[email].data", emails[email].data);
-
             promises.push(emailService.sendMail(email, emails[email].data, { subject: infoTemplate.subject! }));
         }
         const results = await Promise.allSettled(promises);
@@ -143,7 +143,7 @@ class CandidateService {
         return infoTemplate;
     };
 
-    private getInfoCandidates = async (infoTemplate: EmailTemplateType) => {
+    public getInfoCandidates = async (infoTemplate: EmailTemplateType) => {
         const emails = await (async function () {
             const emailAndInfo: { [key: string]: any } = {};
             const infoCandidate = await candidateRepository.getAnyEmail(15);
@@ -156,7 +156,6 @@ class CandidateService {
                 info.email = candi.email;
                 info.data = valuesObject.reduce((acc: Record<string, any>, currentItem: Record<string, any>) => {
                     const key = Object.keys(currentItem)[0].match(regex)?.[1] as string;
-                    console.log(key);
 
                     const valueOfKey = currentItem[`{{${key}}}`];
                     let value = valueOfKey;

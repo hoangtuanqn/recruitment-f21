@@ -53,13 +53,23 @@ model LoginLog {
 
   @@map("logs")
 }
+
 model EmailTemplate {
-  id          String   @id @default(uuid()) @db.Char(36)
-  name        String   @unique @map("template_name") @db.VarChar(100)
-  subject     String  @db.VarChar(255)
-  values      Json
-  status      Boolean    @default(false)
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id        String   @id @default(uuid()) @db.Char(36)
+  name      String   @map("name") @db.VarChar(100)
+  pathName  String   @unique @map("path_name") @db.VarChar(100)
+  subject   String   @db.VarChar(255)
+  values    Json
+  status    Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   @@map("email_templates")
+}
+
+model Settings {
+  name  String @unique @db.VarChar(255)
+  value String @default("") @db.VarChar(255)
+
+  @@map("settings")
 }

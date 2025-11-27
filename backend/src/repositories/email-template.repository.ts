@@ -1,11 +1,53 @@
 import prisma from "~/configs/prisma";
-import { CandidateType } from "~/schemas/candidate.schema";
-import { paginate } from "~/utils/pagination";
-
+import { TemplateEditRequest } from "~/models/requests/template.requests";
+import EmailTemplate from "~/schemas/email-tempate";
+interface TemplateCreateType {
+    name: string;
+    subject: string;
+    status: "1" | "0";
+    path_name: string;
+    values: any;
+}
 class EmailTemplateRepository {
     getTemplateActive = async () => {
         return prisma.emailTemplate.findFirst({
             where: { status: true },
+        });
+    };
+    countActive = async () => {
+        return prisma.emailTemplate.count({
+            where: { status: true },
+        });
+    };
+    gettAll = async () => {
+        return prisma.emailTemplate.findMany();
+    };
+    create = async (data: TemplateCreateType) => {
+        return prisma.emailTemplate.create({
+            data: new EmailTemplate({
+                name: data.name,
+                subject: data.subject,
+                values: data.values,
+                pathName: data.path_name,
+                status: data.status === "1",
+            }),
+        });
+    };
+
+    findById = async (id: string) => {
+        return prisma.emailTemplate.findUnique({
+            where: { id },
+        });
+    };
+    update = async (id: string, payload: any) => {
+        return prisma.emailTemplate.update({
+            where: { id },
+            data: {
+                name: payload.name,
+                subject: payload.subject,
+                values: payload.parameters,
+                status: payload.status === "1",
+            },
         });
     };
 }

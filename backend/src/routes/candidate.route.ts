@@ -2,7 +2,7 @@ import { validate } from "~/utils/validation";
 import { Router } from "express";
 import multer from "multer";
 import * as candidateController from "~/controllers/candidates.controllers";
-import { confirmSendMailSchema, getAllCandidateQuerySchema } from "~/models/candidate/candidate.schema";
+import { confirmSendMailSchema, getAllCandidateQuerySchema } from "~/models/rules/candidate.schema";
 import { auth, isRole } from "~/middlewares/auth.middlewares";
 
 const candidateRouter = Router();

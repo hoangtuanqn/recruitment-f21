@@ -5,6 +5,9 @@ import LoginPage from "./pages/Login";
 import CreatePage from "./pages/Create";
 import LogPage from "./pages/Logs";
 import AccountPage from "./pages/Accounts";
+import TemplatesPage from "./pages/Templates";
+import AddTemplate from "./pages/AddTemplate";
+import EditTemplate from "./pages/EditTemplate";
 
 const App = () => {
     return (
@@ -15,6 +18,9 @@ const App = () => {
                 <Route path="/create" element={<CreatePage />} />
                 <Route path="/logs" element={<LogPage />} />
                 <Route path="/accounts" element={<AccountPage />} />
+                <Route path="/templates" element={<TemplatesPage />} />
+                <Route path="/add-template" element={<AddTemplate />} />
+                <Route path="/template/:id" element={<EditTemplate />} />
             </Route>
 
             {/* <Route element={<AuthLayout />}>
