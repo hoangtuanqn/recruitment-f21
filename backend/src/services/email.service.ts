@@ -24,14 +24,14 @@ class EmailService {
     public sendMail = async (
         toEmail: string,
         data: { [key: string]: string | number },
-        infoTempl: { subject: string },
+        infoTempl: { subject: string; pathName: string },
     ) => {
         try {
             const info = await this.transporter.sendMail({
-                from: "DEMO F-CODE",
+                from: "F-CODE",
                 to: toEmail,
                 subject: infoTempl.subject!,
-                html: await this.readRecruitmentTemplate(data),
+                html: await this.readRecruitmentTemplate(data, infoTempl.pathName),
             });
             // console.log(info);
         } catch (err: any) {
@@ -40,9 +40,9 @@ class EmailService {
         }
     };
 
-    private readRecruitmentTemplate = async (data: { [key: string]: string | number }) => {
+    private readRecruitmentTemplate = async (data: { [key: string]: string | number }, pathName: string) => {
         // 1. Xây dựng đường dẫn tuyệt đối
-        const templatePath = path.join(this.TEMPLATE_DIR, "recruitment.html");
+        const templatePath = path.join(this.TEMPLATE_DIR, pathName);
 
         try {
             // 2. Đọc nội dung tệp

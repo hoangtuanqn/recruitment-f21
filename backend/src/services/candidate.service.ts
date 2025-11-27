@@ -13,6 +13,13 @@ import emailTemplateRepository from "~/repositories/email-template.repository";
 import { EmailTemplateType } from "~/schemas/email-tempate";
 import settingRepository from "~/repositories/setting.repository";
 
+interface InfoTestEmailType {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    studentCode: string;
+}
 class CandidateService {
     public getAll = async (page: number = 1, limit: number = 20) => {
         const data = await candidateRepository.getCandidates(page, limit);
@@ -103,6 +110,8 @@ class CandidateService {
     };
 
     public sendMail = async () => {
+        console.log("vô");
+
         const infoTemplate = await this.getTemplateSendEmail();
         const emails = await this.getInfoCandidates(infoTemplate as EmailTemplateType);
 
@@ -110,7 +119,12 @@ class CandidateService {
 
         const promises: Promise<void>[] = [];
         for (let email of emailLocked) {
-            promises.push(emailService.sendMail(email, emails[email].data, { subject: infoTemplate.subject! }));
+            promises.push(
+                emailService.sendMail(email, emails[email].data, {
+                    subject: infoTemplate.subject!,
+                    pathName: infoTemplate.pathName,
+                }),
+            );
         }
         const results = await Promise.allSettled(promises);
 
@@ -144,10 +158,10 @@ class CandidateService {
         return infoTemplate;
     };
 
-    public getInfoCandidates = async (infoTemplate: EmailTemplateType) => {
+    public getInfoCandidates = async (infoTemplate: EmailTemplateType, infoPerson: InfoTestEmailType | null = null) => {
         const emails = await (async function () {
             const emailAndInfo: { [key: string]: any } = {};
-            const infoCandidate = await candidateRepository.getAnyEmail(15);
+            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(15);
 
             infoCandidate.map((item) => item.email);
             infoCandidate.forEach((candi) => {

@@ -43,6 +43,8 @@ export const testSendMail = async (
             result,
         });
     } catch (error) {
+        console.log(error);
+
         return next(error);
     }
 };

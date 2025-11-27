@@ -47,9 +47,12 @@ class TemplateService {
     public testSendMail = async (payload: TestSendMailRequest) => {
         const { templateId, email } = payload;
         const template = await emailTemplateRepository.findById(templateId);
-        const info = await candidateService.getInfoCandidates(template as EmailTemplateType);
-        console.log(info[email].data);
-        await emailService.sendMail(email, info[email].data, { subject: template?.subject! });
+        const info = await candidateService.getInfoCandidates(template as EmailTemplateType, payload as any);
+        console.log(info[email]);
+        await emailService.sendMail(email, info[email].data, {
+            subject: template?.subject!,
+            pathName: template?.pathName!,
+        });
     };
     public getDetail = async (id: string) => {
         return await emailTemplateRepository.findById(id);

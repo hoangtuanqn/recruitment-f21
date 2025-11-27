@@ -65,6 +65,7 @@ export function TemplatePopup({
             setOpen(false);
         },
         onError: (error) => {
+            setOpen(false);
             let errorMessage = "Đã xảy ra lỗi không xác định!!";
             if (axios.isAxiosError(error) && error.response?.data.message) {
                 errorMessage = error.response.data.message;

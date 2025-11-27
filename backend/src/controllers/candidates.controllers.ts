@@ -93,14 +93,19 @@ export const exportExcel = async (req: Request, res: Response, next: NextFunctio
     }
 };
 export const sendMail = async (req: Request, res: Response, next: NextFunction) => {
-    const start = Date.now();
-    await candidateService.sendMail();
-    const end = Date.now();
-    console.log((end - start) / 1000);
+    try {
+        const start = Date.now();
+        await candidateService.sendMail();
+        const end = Date.now();
+        console.log((end - start) / 1000);
 
-    return res.json({
-        message: "Đã gửi email thành công",
-    });
+        return res.json({
+            message: "Đã gửi email thành công",
+        });
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
 };
 // export const refreshToken = async (
 //     req: Request<ResetPasswordRequestParams, any, RefreshTokenRequestBody>,

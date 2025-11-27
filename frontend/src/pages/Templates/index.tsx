@@ -11,10 +11,6 @@ import { Label } from "~/components/ui/label";
 import { Switch } from "~/components/ui/switch";
 import type { TemplateType } from "~/types/template.types";
 
-interface StatusResponse {
-    result: boolean;
-}
-
 const columns = ["Tên gợi nhớ", "Subject", "Tham số", "Trạng thái", "Action"];
 const TemplatesPage = () => {
     const [open, setOpen] = useState(false);
@@ -44,7 +40,7 @@ const TemplatesPage = () => {
     const { mutate: changeStatusMutate, isPending: isChangingStatus } = useMutation({
         mutationFn: async (newStatus: boolean) => {
             await Template.changeStatus(newStatus);
-        },
+        },  
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["globalStatus"] });
             console.log("Trạng thái kích hoạt gửi mail tự động đã được thay đổi thành công.");
