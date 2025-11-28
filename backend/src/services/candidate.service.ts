@@ -161,7 +161,7 @@ class CandidateService {
     public getInfoCandidates = async (infoTemplate: EmailTemplateType, infoPerson: InfoTestEmailType | null = null) => {
         const emails = await (async function () {
             const emailAndInfo: { [key: string]: any } = {};
-            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(15);
+            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(20);
 
             infoCandidate.map((item) => item.email);
             infoCandidate.forEach((candi) => {

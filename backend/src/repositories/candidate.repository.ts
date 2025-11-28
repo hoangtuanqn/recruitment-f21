@@ -67,8 +67,10 @@ class CandidateRepository {
             where: {
                 isSendMail: false,
             },
-
             take: qty,
+            orderBy: {
+                createdAt: "desc",
+            },
         });
     };
 
