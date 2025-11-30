@@ -41,15 +41,18 @@ class EmailTemplateRepository {
         });
     };
     update = async (id: string, payload: any, fileName: string) => {
+        const update = {
+            name: payload.name,
+            subject: payload.subject,
+            values: payload.parameters,
+            status: payload.status === "1",
+        };
+        if (fileName) {
+            Object.assign(update, { pathName: fileName });
+        }
         return prisma.emailTemplate.update({
             where: { id },
-            data: {
-                name: payload.name,
-                subject: payload.subject,
-                values: payload.parameters,
-                status: payload.status === "1",
-                pathName: fileName,
-            },
+            data: update,
         });
     };
 

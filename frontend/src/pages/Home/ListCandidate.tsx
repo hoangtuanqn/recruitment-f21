@@ -18,6 +18,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "~/components/ui/select";
+import Template from "~/api-requests/template";
+import { Switch } from "~/components/ui/switch";
+import { Label } from "~/components/ui/label";
 const columns = ["Student Code", "First Name", "Last Name", "Major", "Infomation", "Semester", "Action"];
 const ListCandidate = () => {
     const queryClient = useQueryClient();
@@ -91,8 +94,36 @@ const ListCandidate = () => {
         setPage(page);
         setSelected([]);
     };
-
-    if (isLoading) return <Loading />;
+    const { data: globalStatusData, isLoading: isStatusLoading } = useQuery({
+        queryKey: ["globalStatus"],
+        queryFn: async () => {
+            const result = await Template.getStatus();
+            return result.data.result;
+        },
+        staleTime: 1000 * 60 * 5,
+    });
+    const { mutate: changeStatusMutate, isPending: isChangingStatus } = useMutation({
+        mutationFn: async (newStatus: boolean) => {
+            await Template.changeStatus(newStatus);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["globalStatus"] });
+            console.log("Trạng thái kích hoạt gửi mail tự động đã được thay đổi thành công.");
+        },
+        onError: (error) => {
+            console.error("Lỗi khi thay đổi trạng thái:", error);
+        },
+    });
+    const handleToggleGlobalStatus = (newChecked: boolean) => {
+        if (newChecked) {
+            if (!confirm("Bạn đã test trước khi kích hoạt send mail chưa?")) {
+                return;
+            }
+        }
+        changeStatusMutate(newChecked);
+    };
+    const isActivated = globalStatusData ?? false;
+    if (isLoading || isStatusLoading) return <Loading />;
 
     return (
         <>
@@ -162,6 +193,25 @@ const ListCandidate = () => {
                     </Button>
                 </div>
             </div>
+            {user?.role === "ADMIN" && (
+                <div className="my-5 flex items-center justify-center space-x-2">
+                    <Switch
+                        id="global-mail-switch"
+                        checked={isActivated}
+                        onCheckedChange={handleToggleGlobalStatus}
+                        disabled={isChangingStatus}
+                    />
+                    <Label
+                        htmlFor="global-mail-switch"
+                        className={isChangingStatus ? "opacity-50 transition-opacity" : ""}
+                    >
+                        {isChangingStatus
+                            ? "Đang cập nhật trạng thái..."
+                            : "Kích hoạt gửi mail tự động (Tự động gửi khi có dữ liệu mới)"}
+                    </Label>
+                </div>
+            )}
+
             <div className="relative mt-5 flex h-full w-full flex-col overflow-auto rounded-xl bg-white bg-clip-border text-gray-700 shadow-md">
                 <table className="w-full min-w-max table-auto text-left">
                     <thead>
