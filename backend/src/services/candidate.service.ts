@@ -1,7 +1,7 @@
 import fs from "fs";
 import { HTTP_STATUS } from "~/constants/httpStatus";
 import { ErrorWithStatus } from "~/models/Error";
-import Candidate, { CandidateType } from "~/schemas/candidate.schema";
+import Candidate, { CandidateScore, CandidateType } from "~/schemas/candidate.schema";
 import Helpers from "~/utils/helpers";
 import candidateRepository from "~/repositories/candidate.repository";
 import prisma from "~/configs/prisma";
@@ -23,7 +23,6 @@ interface InfoTestEmailType {
 class CandidateService {
     public getAll = async (page: number = 1, limit: number = 20) => {
         const data = await candidateRepository.getCandidates(page, limit);
-
         return data;
     };
     public handleRawData = async (userId: string, filePath: string | null) => {
@@ -36,6 +35,7 @@ class CandidateService {
         await candidateRepository.updateCreatedAtFirst(studentsCode[0]);
         return result;
     };
+
     public confirmSendMail = async (userId: string, ids: string[]) => {
         const user = await userRespository.findById(userId);
         if (user) {

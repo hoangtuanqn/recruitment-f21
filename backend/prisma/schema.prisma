@@ -27,18 +27,19 @@ model User {
 }
 
 model Candidate {
-  id          String   @id @default(uuid()) @db.Char(36)
-  firstName   String   @map("first_name") @db.VarChar(50)
-  lastName    String   @map("last_name") @db.VarChar(50)
-  major       String   @db.VarChar(200)
-  email       String   @unique @db.VarChar(100)
-  phone       String   @db.VarChar(20)
-  semester    String   @db.VarChar(20)
-  studentCode String   @unique @map("student_code") @db.VarChar(20)
-  note        String   @default("")
-  isSendMail  Boolean  @default(false) @map("is_send_mail")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id           String        @id @default(uuid()) @db.Char(36)
+  firstName    String        @map("first_name") @db.VarChar(50)
+  lastName     String        @map("last_name") @db.VarChar(50)
+  major        String        @db.VarChar(200)
+  email        String        @unique @db.VarChar(100)
+  phone        String        @db.VarChar(20)
+  semester     String        @db.VarChar(20)
+  studentCode  String        @unique @map("student_code") @db.VarChar(20)
+  note         String        @default("")
+  isSendMail   Boolean       @default(false) @map("is_send_mail")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+  scoreResults ScoreResult[]
 
   @@map("candidates")
 }
@@ -72,4 +73,30 @@ model Settings {
   value String @default("") @db.VarChar(255)
 
   @@map("settings")
+}
+
+model ScoreResult {
+  id          String    @id @default(uuid()) @db.Char(36)
+  candidateId String    @unique @map("candidate_id")
+  round       RoundType @default(ROUND_REGISTER)
+  score       Json      @db.Json
+  result      Status    @default(PENDING)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+
+  @@map("score_results")
+}
+
+enum Status {
+  PASSED
+  FAILED
+  PENDING
+}
+
+enum RoundType {
+  ROUND_REGISTER
+  ROUND_1
+  ROUND_2
+  ROUND_3
 }

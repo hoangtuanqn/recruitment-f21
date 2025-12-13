@@ -3,11 +3,11 @@ import HomePage from "./pages/Home";
 import MainLayout from "./layouts/MainLayout";
 import LoginPage from "./pages/Login";
 import CreatePage from "./pages/Create";
-import LogPage from "./pages/Logs";
 import AccountPage from "./pages/Accounts";
 import TemplatesPage from "./pages/Templates";
 import AddTemplate from "./pages/AddTemplate";
 import EditTemplate from "./pages/EditTemplate";
+import LogPage from "./pages/Logs";
 
 const App = () => {
     return (

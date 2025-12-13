@@ -10,6 +10,7 @@ import logRouter from "./routes/log.route";
 import "./configs/env";
 import templateRouter from "./routes/template.routes";
 import "./cron-job/send-mail";
+import scoreRouter from "./routes/score.routes";
 const app = express();
 const PORT = process.env.PORT || 8000;
 app.use(express.static("uploads"));
@@ -28,6 +29,8 @@ app.use("/auth", authRouter);
 app.use("/candidate", candidateRouter);
 app.use("/template", templateRouter);
 app.use("/logs", logRouter);
+app.use("/score", logRouter);
+app.use("/score", scoreRouter);
 app.use(defaultErrorHandler);
 app.use(defaultSuccessHandler);
 app.listen(PORT, () => {

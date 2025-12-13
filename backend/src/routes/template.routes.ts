@@ -13,7 +13,6 @@ templateRouter.post(
     "/create",
     auth,
     isRole(["ADMIN"]),
-    // validate(templateAddSchema),
     upload("/templates").single("file"),
     templateController.create,
 );

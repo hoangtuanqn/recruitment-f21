@@ -1,4 +1,5 @@
 import { v7 as uuidv7 } from "uuid";
+import { RoundType } from "~/constants/enums";
 
 export interface CandidateType {
     id?: string;
@@ -13,6 +14,11 @@ export interface CandidateType {
     isSendMail?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
+}
+export interface CandidateScore {
+    email: string;
+    round: RoundType;
+    score: number;
 }
 
 // 2. Class Candidate

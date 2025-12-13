@@ -1,13 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { ArrowBigLeft, ArrowBigRight, NotebookPen } from "lucide-react";
+import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import Candidate from "~/api-requests/candidates";
 import Loading from "~/components/Loading";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import { useAuth } from "~/hooks/use-auth";
 import {
     Select,
@@ -21,7 +20,28 @@ import {
 import Template from "~/api-requests/template";
 import { Switch } from "~/components/ui/switch";
 import { Label } from "~/components/ui/label";
-const columns = ["Student Code", "First Name", "Last Name", "Major", "Infomation", "Semester", "Action"];
+import type { ScoreResultsType } from "~/types/candidate.types";
+const columns = ["Mã SV / Kỳ", "Họ tên", "Thông tin", "Điểm & Trạng thái"];
+
+// Helper function to calculate average score
+const calculateAverageScore = (scoreResults: ScoreResultsType[]) => {
+    if (!scoreResults || scoreResults.length === 0) return 0;
+
+    let totalScore = 0;
+    let scoreCount = 0;
+
+    scoreResults.forEach((result) => {
+        if (result.score && Array.isArray(result.score)) {
+            result.score.forEach((s: { score: number }) => {
+                totalScore += s.score;
+                scoreCount++;
+            });
+        }
+    });
+
+    return scoreCount > 0 ? (totalScore / scoreCount).toFixed(2) : 0;
+};
+
 const ListCandidate = () => {
     const queryClient = useQueryClient();
     const [limit, setLimit] = useState(20);
@@ -139,14 +159,14 @@ const ListCandidate = () => {
                 <div className="flex gap-2">
                     {user?.role !== "VIEWER" && (
                         <>
-                            <Button
+                            {/* <Button
                                 className="bg-blue-500 text-xs text-white italic"
                                 variant={"outline"}
                                 onClick={handleSendedEmail}
                                 disabled={selected.length === 0}
                             >
                                 Xác nhận đã gửi email ({selected.length})
-                            </Button>
+                            </Button> */}
 
                             <Link
                                 to={`${import.meta.env.VITE_API_URL}/candidate/export-excel?page=${page}&limit=${limit}`}
@@ -194,21 +214,21 @@ const ListCandidate = () => {
                 </div>
             </div>
             {user?.role === "ADMIN" && (
-                <div className="my-5 flex items-center justify-center space-x-2">
-                    <Switch
-                        id="global-mail-switch"
-                        checked={isActivated}
-                        onCheckedChange={handleToggleGlobalStatus}
-                        disabled={isChangingStatus}
-                    />
-                    <Label
-                        htmlFor="global-mail-switch"
-                        className={isChangingStatus ? "opacity-50 transition-opacity" : ""}
-                    >
-                        {isChangingStatus
-                            ? "Đang cập nhật trạng thái..."
-                            : "Kích hoạt gửi mail tự động (Tự động gửi khi có dữ liệu mới)"}
-                    </Label>
+                <div className="flex justify-center">
+                    <div className="my-5 inline-flex items-center justify-center space-x-2 rounded-xl border p-4">
+                        <Switch
+                            id="global-mail-switch"
+                            checked={isActivated}
+                            onCheckedChange={handleToggleGlobalStatus}
+                            disabled={isChangingStatus}
+                        />
+                        <Label
+                            htmlFor="global-mail-switch"
+                            className={isChangingStatus ? "opacity-50 transition-opacity" : ""}
+                        >
+                            {isChangingStatus ? "Đang cập nhật trạng thái..." : "Gửi mail báo kết quả"}
+                        </Label>
+                    </div>
                 </div>
             )}
 
@@ -216,7 +236,7 @@ const ListCandidate = () => {
                 <table className="w-full min-w-max table-auto text-left">
                     <thead>
                         <tr className="">
-                            <th className="border-blue-gray-100 bg-blue-gray-50 border-b p-4">
+                            {/* <th className="border-blue-gray-100 bg-blue-gray-50 border-b p-4">
                                 <Checkbox
                                     className="cursor-pointer"
                                     onClick={handleSelectAll}
@@ -225,7 +245,7 @@ const ListCandidate = () => {
                                     }
                                     disabled={candidateNotReceivedMail?.length === 0}
                                 />
-                            </th>
+                            </th> */}
                             {columns.map((column) => (
                                 <th className="border-blue-gray-100 bg-blue-gray-50 border-b p-4">
                                     <p className="text-blue-gray-900 block font-sans text-sm leading-none font-bold antialiased">
@@ -242,7 +262,7 @@ const ListCandidate = () => {
                     <tbody>
                         {candidates?.map((item) => (
                             <tr>
-                                <td className="border-blue-gray-50 border-b p-4">
+                                {/* <td className="border-blue-gray-50 border-b p-4">
                                     {!item.isSendMail && (
                                         <Checkbox
                                             className="cursor-pointer"
@@ -250,61 +270,77 @@ const ListCandidate = () => {
                                             checked={selected.findIndex((data) => data === item.id) !== -1}
                                         />
                                     )}
+                                </td> */}
+                                <td className="border-blue-gray-50 border-b p-4">
+                                    <p className="text-blue-gray-900 text-sm font-semibold">{item.studentCode}</p>
+                                    <p className="text-xs text-gray-500">Kỳ {item.semester}</p>
                                 </td>
                                 <td className="border-blue-gray-50 border-b p-4">
-                                    <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        {item.studentCode}
-                                    </p>
+                                    <div className="text-sm">
+                                        <p className="text-blue-gray-900 font-semibold">
+                                            {item.firstName} {item.lastName}
+                                        </p>
+                                        <p className="mt-0.5 text-xs text-gray-600">Ngành: {item.major}</p>
+                                    </div>
                                 </td>
                                 <td className="border-blue-gray-50 border-b p-4">
-                                    <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        {item.firstName}
-                                    </p>
-                                </td>
-                                <td className="border-blue-gray-50 border-b p-4">
-                                    <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        {item.lastName}
-                                    </p>
-                                </td>
-                                <td className="border-blue-gray-50 border-b p-4">
-                                    <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        {item.major}
-                                    </p>
-                                </td>
-                                <td className="border-blue-gray-50 border-b p-4">
-                                    <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        <ul>
-                                            <li>Mail: {item.email || "Đã ẩn"}</li>
-                                            <li>Phone: {item.phone || "Đã ẩn"}</li>
-                                            <li>
-                                                Tình trạng:{" "}
+                                    <div className="text-sm">
+                                        <ul className="mt-1 space-y-0.5">
+                                            <li className="text-xs">Mail: {item.email || "Đã ẩn"}</li>
+                                            <li className="text-xs">Phone: {item.phone || "Đã ẩn"}</li>
+                                            <li className="text-xs">
+                                                Gửi mail:{" "}
                                                 {item.isSendMail ? (
-                                                    <span className="text-green-600">Đã gửi mail</span>
+                                                    <span className="font-medium text-green-600">Đã gửi</span>
                                                 ) : (
-                                                    <span className="text-yellow-600">Chờ gửi mail</span>
+                                                    <span className="font-medium text-yellow-600">Chờ</span>
+                                                )}
+                                            </li>
+                                            <li className="text-xs">
+                                                Kết quả Vòng 1:{" "}
+                                                {item.scoreResults?.[0]?.result === "PENDING" ? (
+                                                    <span className="font-medium text-yellow-600">Chờ chấm</span>
+                                                ) : item.scoreResults?.[0]?.result === "PASSED" ? (
+                                                    <span className="font-medium text-green-600">Passed</span>
+                                                ) : item.scoreResults?.[0]?.result === "FAILED" ? (
+                                                    <span className="font-medium text-red-600">Failed</span>
+                                                ) : (
+                                                    <span className="font-medium text-red-600">Failed</span>
                                                 )}
                                             </li>
                                         </ul>
-                                    </p>
+                                    </div>
                                 </td>
-
                                 <td className="border-blue-gray-50 border-b p-4">
-                                    <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        {item.semester}
-                                    </p>
-                                </td>
-                                <td className="border-blue-gray-50 border-b p-4 text-center">
-                                    {/* <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        {item.semester}
-                                    </p> */}
-                                    <Button
-                                        variant={"link"}
-                                        className="rounded-xl border"
-                                        onClick={() => alert("Để cho đẹp thôi, hehe!")}
-                                    >
-                                        <NotebookPen />
-                                    </Button>
-                                    {item.note && <p className="mt-1 text-xs text-emerald-500">Có ghi chú</p>}
+                                    {item.scoreResults && item.scoreResults.length > 0 ? (
+                                        <div className="text-sm">
+                                            <div className="mb-2 flex items-center gap-2">
+                                                <p className="font-bold">
+                                                    TB: {calculateAverageScore(item.scoreResults)}
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                {item.scoreResults.map((sr) => (
+                                                    <div key={sr.id} className="text-xs">
+                                                        <span className="font-medium">Điểm:</span>
+                                                        <span className="ml-1 font-semibold">
+                                                            {sr.score.map((s: { score: number }) => (
+                                                                <span
+                                                                    className={`mr-1 ${s.score < 50 ? `text-red-600` : `text-green-600`}`}
+                                                                >
+                                                                    {s.score}
+                                                                </span>
+                                                            ))}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600">
+                                            Chưa nộp
+                                        </span>
+                                    )}
                                 </td>
                             </tr>
                         ))}

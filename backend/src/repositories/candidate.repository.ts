@@ -13,6 +13,15 @@ class CandidateRepository {
                     id: "desc",
                 },
             ],
+            include: {
+                scoreResults: {
+                    omit: {
+                        updatedAt: true,
+                        createdAt: true,
+                        candidateId: true,
+                    },
+                },
+            },
         });
         return result;
     };
@@ -83,6 +92,14 @@ class CandidateRepository {
             },
             data: {
                 isSendMail: true,
+            },
+        });
+    };
+
+    getCandidateByEmail = async (email: string) => {
+        return prisma.candidate.findUnique({
+            where: {
+                email,
             },
         });
     };

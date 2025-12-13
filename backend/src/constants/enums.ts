@@ -22,3 +22,14 @@ export enum ExpiresInTokenType {
     ForgotPasswordToken = 15 * 60, // 15 phút
     EmailVerifyToken = 7 * 24 * 60 * 60, // 7 ngày
 }
+export enum RoundType {
+    ROUND_REGISTER = "ROUND_REGISTER",
+    ROUND_1 = "ROUND_1",
+    ROUND_2 = "ROUND_2",
+    ROUND_3 = "ROUND_3",
+}
+export enum ScoreResultType {
+    PASSED = "PASSED",
+    FAILED = "FAILED",
+    PENDING = "PENDING",
+}

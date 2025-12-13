@@ -107,20 +107,3 @@ export const sendMail = async (req: Request, res: Response, next: NextFunction) 
         next(error);
     }
 };
-// export const refreshToken = async (
-//     req: Request<ResetPasswordRequestParams, any, RefreshTokenRequestBody>,
-//     res: Response,
-//     next: NextFunction,
-// ) => {
-//     const { token } = req.body;
-//     const userId = req.userId as string;
-//     try {
-//         const result = await userService.refreshToken(userId, token);
-//         return res.status(HTTP_STATUS.OK).json({
-//             message: "Cấp lại token mới thành công!",
-//             result,
-//         });
-//     } catch (error) {
-//         return next(error);
-//     }
-// };

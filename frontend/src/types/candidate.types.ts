@@ -13,6 +13,15 @@ export interface Candidate {
     note: string;
     createdAt: string;
     updatedAt: string;
+    scoreResults: ScoreResultsType[];
+}
+export interface ScoreResultsType {
+    id: string;
+    round: string;
+    score: {
+        score: number;
+    }[];
+    result: string;
 }
 
 export interface CandidateList {
