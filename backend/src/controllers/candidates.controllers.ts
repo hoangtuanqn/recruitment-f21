@@ -55,6 +55,21 @@ export const confirmSendMail = async (
         return next(error);
     }
 };
+export const changeStatusScore = async (
+    req: Request<ParamsDictionary, any, { studentCode: string; status: "PASSED" | "FAILED" }>,
+    res: Response,
+    next: NextFunction,
+) => {
+    try {
+        const result = await candidateService.changeStatusScore(req.body.studentCode, req.body.status);
+        return res.status(HTTP_STATUS.OK).json({
+            message: "Đã cập nhật dữ liệu thành công!",
+            result,
+        });
+    } catch (error) {
+        return next(error);
+    }
+};
 export const stats = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const result = await candidateService.getCandidateStats();

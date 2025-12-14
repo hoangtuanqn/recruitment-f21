@@ -1,3 +1,4 @@
+import { changeStatusScore } from "./../controllers/candidates.controllers";
 import fs from "fs";
 import { HTTP_STATUS } from "~/constants/httpStatus";
 import { ErrorWithStatus } from "~/models/Error";
@@ -47,6 +48,18 @@ class CandidateService {
                 message: "Người dùng không tồn tại trong hệ thống!",
             });
         }
+    };
+
+    public changeStatusScore = async (studentCode: string, status: "PASSED" | "FAILED") => {
+        const candidate = await candidateRepository.findByStudentCode(studentCode);
+        if (!candidate) {
+            throw new ErrorWithStatus({
+                status: HTTP_STATUS.NOT_FOUND,
+                message: "Không tìm thấy ứng viên với mã sinh viên đã cho!",
+            });
+        }
+        await candidateRepository.changeStatus(candidate.id, status);
+        return candidate;
     };
     public getCandidateStats = async () => {
         // 1. Định nghĩa phạm vi thời gian cho Ngày hôm nay

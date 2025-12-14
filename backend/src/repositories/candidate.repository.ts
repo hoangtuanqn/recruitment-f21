@@ -25,6 +25,15 @@ class CandidateRepository {
         });
         return result;
     };
+    findByStudentCode = async (studentCode: string) => {
+        const result = await prisma.candidate.findUnique({
+            where: {
+                studentCode,
+            },
+        });
+
+        return result;
+    };
     createMany = async (data: CandidateType[]) => {
         const result = await prisma.candidate.createMany({
             data,
@@ -100,6 +109,17 @@ class CandidateRepository {
         return prisma.candidate.findUnique({
             where: {
                 email,
+            },
+        });
+    };
+    changeStatus = async (id: string, status: "PASSED" | "FAILED") => {
+        return prisma.scoreResult.update({
+            where: {
+                candidateId: id,
+            },
+            data: {
+                result: status,
+                updatedAt: new Date(),
             },
         });
     };

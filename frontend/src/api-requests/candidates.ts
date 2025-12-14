@@ -6,5 +6,7 @@ class Candidate {
         publicApi.get<CandidateList>(`/candidate/get-all?page=${page}&limit=${limit}`);
     static stats = () => publicApi.get<CandidateStatsType>("/candidate/stats");
     static confirmSendMail = (data: string[]) => publicApi.post("/candidate/confirm-send-mail", { ids: data });
+    static changeStatus = (studentCode: string, status: "PASSED" | "FAILED") =>
+        publicApi.post("/candidate/change-status", { studentCode, status });
 }
 export default Candidate;

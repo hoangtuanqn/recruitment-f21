@@ -1,9 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
+import { ArrowBigLeft, ArrowBigRight, Eye } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Swal from "sweetalert2";
 import Candidate from "~/api-requests/candidates";
 import Loading from "~/components/Loading";
 import { Button } from "~/components/ui/button";
@@ -21,7 +19,8 @@ import Template from "~/api-requests/template";
 import { Switch } from "~/components/ui/switch";
 import { Label } from "~/components/ui/label";
 import type { ScoreResultsType } from "~/types/candidate.types";
-const columns = ["Mã SV / Kỳ", "Họ tên", "Thông tin", "Điểm & Trạng thái"];
+import { ViewResume } from "~/components/ViewResume";
+const columns = ["Mã SV / Kỳ", "Họ tên", "Thông tin", "Điểm & Trạng thái", "Action"];
 
 // Helper function to calculate average score
 const calculateAverageScore = (scoreResults: ScoreResultsType[]) => {
@@ -45,9 +44,9 @@ const calculateAverageScore = (scoreResults: ScoreResultsType[]) => {
 const ListCandidate = () => {
     const queryClient = useQueryClient();
     const [limit, setLimit] = useState(20);
-    const [selected, setSelected] = useState<string[]>([]);
+    const [, setSelected] = useState<string[]>([]);
     const [page, setPage] = useState(1);
-    const { data, isLoading, refetch } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ["candidate", page, limit],
         queryFn: async () => {
             const result = await Candidate.getAll(page, limit);
@@ -58,55 +57,9 @@ const ListCandidate = () => {
 
     const candidates = data?.result.data;
     const meta = data?.result.meta;
-    const candidateNotReceivedMail = candidates?.filter((item) => !item.isSendMail);
 
     const { user } = useAuth();
-    const handleSelectAll = () => {
-        if (selected.length !== candidateNotReceivedMail?.length || 0) {
-            setSelected(candidateNotReceivedMail?.map((item) => item.id) || []);
-        } else {
-            setSelected([]);
-        }
-    };
-    const handleSelected = (id: string) => {
-        const idx = selected.findIndex((data) => data === id);
-        if (idx === -1) {
-            const selectedNew = [...selected, id];
-            setSelected(selectedNew);
-        } else {
-            setSelected(selected.filter((item) => item !== id));
-        }
-    };
-    const mutation = useMutation({
-        mutationFn: async (data: string[]) => {
-            const result = await Candidate.confirmSendMail(data);
-            return result.data;
-        },
-        onSuccess: () => {
-            setSelected([]);
-            queryClient.invalidateQueries({ queryKey: ["stats"] });
-            refetch();
-            Swal.fire({
-                title: "Good job!",
-                text: "Confirm successfully!",
-                icon: "success",
-            });
-        },
-        onError: (error) => {
-            if (axios.isAxiosError(error)) {
-                Swal.fire({
-                    title: "Faild!",
-                    text: error?.response?.data.message ?? "Confirm Failled!",
-                    icon: "error",
-                });
-            }
-        },
-    });
-    const handleSendedEmail = () => {
-        if (confirm("Bạn có chắc chắn chưa? Sau khi xác nhận, bạn không thể chuyển trạng thái được nữa?")) {
-            mutation.mutate(selected);
-        }
-    };
+
     const handleChangePage = (page: number) => {
         if (page < 1 || page > (meta?.totalPages || 0)) {
             return;
@@ -142,6 +95,12 @@ const ListCandidate = () => {
         }
         changeStatusMutate(newChecked);
     };
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [dataResume, setDataResume] = useState({
+        studentCode: "",
+        urlResume: "",
+        scores: [] as { score: number }[],
+    });
     const isActivated = globalStatusData ?? false;
     if (isLoading || isStatusLoading) return <Loading />;
 
@@ -159,15 +118,6 @@ const ListCandidate = () => {
                 <div className="flex gap-2">
                     {user?.role !== "VIEWER" && (
                         <>
-                            {/* <Button
-                                className="bg-blue-500 text-xs text-white italic"
-                                variant={"outline"}
-                                onClick={handleSendedEmail}
-                                disabled={selected.length === 0}
-                            >
-                                Xác nhận đã gửi email ({selected.length})
-                            </Button> */}
-
                             <Link
                                 to={`${import.meta.env.VITE_API_URL}/candidate/export-excel?page=${page}&limit=${limit}`}
                                 target="_blank"
@@ -220,7 +170,8 @@ const ListCandidate = () => {
                             id="global-mail-switch"
                             checked={isActivated}
                             onCheckedChange={handleToggleGlobalStatus}
-                            disabled={isChangingStatus}
+                            // disabled={isChangingStatus}
+                            disabled={true}
                         />
                         <Label
                             htmlFor="global-mail-switch"
@@ -231,7 +182,6 @@ const ListCandidate = () => {
                     </div>
                 </div>
             )}
-
             <div className="relative mt-5 flex h-full w-full flex-col overflow-auto rounded-xl bg-white bg-clip-border text-gray-700 shadow-md">
                 <table className="w-full min-w-max table-auto text-left">
                     <thead>
@@ -342,11 +292,35 @@ const ListCandidate = () => {
                                         </span>
                                     )}
                                 </td>
+                                <td className="border-blue-gray-50 border-b p-4">
+                                    {item.scoreResults?.[0]?.result == "PENDING" && (
+                                        <Button
+                                            onClick={() => {
+                                                setIsOpenModal(true);
+                                                setDataResume({
+                                                    urlResume: `/resume/${item.studentCode}/last_submit.pdf`,
+                                                    scores: item.scoreResults?.[0]?.score || [],
+                                                    studentCode: item.studentCode,
+                                                });
+                                            }}
+                                        >
+                                            <Eye />
+                                            Xem
+                                        </Button>
+                                    )}
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+            <ViewResume
+                studentCode={dataResume.studentCode}
+                url={dataResume.urlResume}
+                isOpenModal={isOpenModal}
+                setIsOpenModal={setIsOpenModal}
+                scores={dataResume.scores}
+            />
         </>
     );
 };
