@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
 import Swal from "sweetalert2";
-import Template from "~/api-requests/template"; // Giả định Template API
+import Template from "~/api-requests/template"; 
 import Logo from "~/components/Logo";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -24,6 +24,8 @@ type TemplateInfoType = {
     name: string;
     subject: string;
     status: "1" | "0";
+    round: "ROUND_1" | "ROUND_2" | "ROUND_3";
+    result: "PASSED" | "FAILED";
 };
 
 type TemplateParameter = {
@@ -37,6 +39,8 @@ const AddTemplate = () => {
         name: "",
         subject: "",
         status: "1",
+        round: "ROUND_1",
+        result: "PASSED",
     });
 
     const [templateFile, setTemplateFile] = useState<File | null>(null);
@@ -57,10 +61,11 @@ const AddTemplate = () => {
         }
     };
 
-    const handleSelectChange = (value: string) => {
+    const handleSelectChange = (name: string, value: string) => {
         setTemplateInfo((prev) => ({
             ...prev,
-            status: value as "1" | "0",
+            // status: value as "1" | "0",
+            [name]: value,
         }));
     };
 
@@ -76,7 +81,7 @@ const AddTemplate = () => {
     const handleRemoveParameter = (index: number) => {
         setParameters((prev) => prev.filter((_, i) => i !== index));
     };
-    // --------------------------
+
 
     const mutation = useMutation({
         mutationFn: async () => {
@@ -87,6 +92,8 @@ const AddTemplate = () => {
             const formData = new FormData();
             formData.append("name", templateInfo.name);
             formData.append("subject", templateInfo.subject);
+            formData.append("round", templateInfo.round);
+            formData.append("result", templateInfo.result);
             formData.append("status", templateInfo.status);
             formData.append("file", templateFile);
             formData.append("parameters", JSON.stringify(parameters));
@@ -190,13 +197,33 @@ const AddTemplate = () => {
                                     <Eye size={15} /> Xem template mẫu
                                 </Link>
                             </Field>
+                            <Field>
+                                <FieldLabel htmlFor="round_select">Vòng</FieldLabel>
+                                <Select
+                                    defaultValue={templateInfo.round}
+                                    name="round"
+                                    onValueChange={(value) => handleSelectChange("round", value)}
+                                >
+                                    <SelectTrigger className="w-full" id="round_select">
+                                        <SelectValue placeholder="Chọn vòng" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Chọn vòng</SelectLabel>
+                                            <SelectItem value="ROUND_1">Vòng 1</SelectItem>
+                                            <SelectItem value="ROUND_2">Vòng 2</SelectItem>
+                                            <SelectItem value="ROUND_3">Vòng 3</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </Field>
 
                             <Field>
                                 <FieldLabel htmlFor="status_select">Trạng thái</FieldLabel>
                                 <Select
                                     defaultValue={templateInfo.status}
                                     name="status"
-                                    onValueChange={handleSelectChange}
+                                    onValueChange={(value) => handleSelectChange("status", value)}
                                 >
                                     <SelectTrigger className="w-full" id="status_select">
                                         <SelectValue placeholder="Chọn trạng thái" />
@@ -206,6 +233,26 @@ const AddTemplate = () => {
                                             <SelectLabel>Trạng thái</SelectLabel>
                                             <SelectItem value="1">Hoạt động</SelectItem>
                                             <SelectItem value="0">Tạm dừng</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel htmlFor="result_select">Kết quả</FieldLabel>
+                                <Select
+                                    defaultValue={templateInfo.result}
+                                    name="result"
+                                    onValueChange={(value) => handleSelectChange("result", value)}
+                                >
+                                    <SelectTrigger className="w-full" id="result_select">
+                                        <SelectValue placeholder="Chọn kết quả" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Kết quả</SelectLabel>
+                                            <SelectItem value="PASSED">Pass</SelectItem>
+                                            <SelectItem value="FAILED">Fail</SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>

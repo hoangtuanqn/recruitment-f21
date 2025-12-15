@@ -1,5 +1,6 @@
 import z from "zod/v3";
 import { templateEditSchema, testSendMailSchema } from "../rules/template.schema";
+import { ResultType, RoundType } from "~/constants/enums";
 
 export type TemplateParameter = {
     key: string;
@@ -9,6 +10,8 @@ export type TemplateParameter = {
 export type TemplateUploadPayload = {
     name: string;
     subject: string;
+    round: RoundType;
+    result: ResultType;
     status: "1" | "0";
     file: File;
     parameters: string;

@@ -1,11 +1,13 @@
 import { v7 as uuidv7 } from "uuid";
+import { ResultType, RoundType } from "~/constants/enums";
 
 export interface EmailTemplateType {
     id?: string;
     name: string;
     pathName: string;
-
     subject: string;
+    round: RoundType;
+    result: ResultType;
     values: { [key: string]: any };
     status?: boolean;
     createdAt?: Date;
@@ -18,6 +20,8 @@ class EmailTemplate {
     name: string;
     pathName: string;
     subject: string;
+    round: RoundType;
+    result: ResultType;
     values: { [key: string]: any };
     status: boolean;
     createdAt: Date;
@@ -27,6 +31,8 @@ class EmailTemplate {
         this.name = tempate.name;
         this.pathName = tempate.pathName;
         this.subject = tempate.subject;
+        this.round = tempate.round;
+        this.result = tempate.result;
         this.values = tempate.values;
         this.status = tempate.status || false;
         this.createdAt = tempate.createdAt || new Date();

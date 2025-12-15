@@ -12,6 +12,7 @@ import emailService from "./email.service";
 import candidateService from "./candidate.service";
 import { EmailTemplateType } from "~/schemas/email-tempate";
 import settingRepository from "~/repositories/setting.repository";
+import { ResultType } from "~/constants/enums";
 
 class TemplateService {
     public getAll = async () => {
@@ -19,22 +20,18 @@ class TemplateService {
         return data;
     };
     public create = async (payload: TemplateUploadPayload, fileName: string) => {
-        const { name, subject, status, parameters } = payload;
+        const { name, subject, round, result, status, parameters } = payload;
         const paramsParse = JSON.parse(parameters) as TemplateParameter[];
         const values = paramsParse.map((item) => ({
             [item.key]: item.value === "other" ? item.defaultValue : item.value,
         }));
-        if ((await emailTemplateRepository.countActive()) > 1) {
-            throw new ErrorWithStatus({
-                status: HTTP_STATUS.CONFLICT,
-                message: "Chỉ được phép có 1 template hoạt động chính!",
-            });
-        }
 
         try {
             await emailTemplateRepository.create({
                 name,
                 subject,
+                round,
+                result,
                 status,
                 path_name: fileName,
                 values,
@@ -47,7 +44,11 @@ class TemplateService {
     public testSendMail = async (payload: TestSendMailRequest) => {
         const { templateId, email } = payload;
         const template = await emailTemplateRepository.findById(templateId);
-        const info = await candidateService.getInfoCandidates(template as EmailTemplateType, payload as any);
+        const info = await candidateService.getInfoCandidates(
+            template as EmailTemplateType,
+            payload as any,
+            ResultType.FAILED,
+        );
         console.log(info[email]);
         await emailService.sendMail(email, info[email].data, {
             subject: template?.subject!,

@@ -91,9 +91,14 @@ export const exportExcel = async (req: Request, res: Response, next: NextFunctio
         { header: "Email", key: "email", width: 40 },
         { header: "Student Code", key: "studentCode", width: 15 },
         { header: "Major", key: "major", width: 30 },
+        { header: "Score 1", key: "score_1", width: 40 },
+        { header: "Score 2", key: "score_2", width: 40 },
+        { header: "Score 3", key: "score_3", width: 40 },
+        { header: "Score 4", key: "score_4", width: 40 },
+        { header: "Score 5", key: "score_5", width: 40 },
+        { header: "Average Score", key: "averageScore", width: 40 },
     ]);
     const data = await candidateService.getAll(+page || 1, +limit || 20);
-
     workbook.setupData(data.data);
 
     workbook.setHeader(res);
@@ -107,18 +112,18 @@ export const exportExcel = async (req: Request, res: Response, next: NextFunctio
         res.status(500).send("Lỗi máy chủ khi tạo file Excel.");
     }
 };
-export const sendMail = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const start = Date.now();
-        await candidateService.sendMail();
-        const end = Date.now();
-        console.log((end - start) / 1000);
+// export const sendMail = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const start = Date.now();
+//         await candidateService.sendMail();
+//         const end = Date.now();
+//         console.log((end - start) / 1000);
 
-        return res.json({
-            message: "Đã gửi email thành công",
-        });
-    } catch (error) {
-        console.log(error);
-        next(error);
-    }
-};
+//         return res.json({
+//             message: "Đã gửi email thành công",
+//         });
+//     } catch (error) {
+//         console.log(error);
+//         next(error);
+//     }
+// };

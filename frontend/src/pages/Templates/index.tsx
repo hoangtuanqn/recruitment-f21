@@ -10,7 +10,7 @@ import { Button } from "~/components/ui/button";
 
 import type { TemplateType } from "~/types/template.types";
 
-const columns = ["Tên gợi nhớ", "Subject", "Tham số", "Trạng thái", "Action"];
+const columns = ["Tên gợi nhớ", "Subject", "Thông tin", "Trạng thái", "Action"];
 const TemplatesPage = () => {
     const [open, setOpen] = useState(false);
     const [itemTest, setItemTest] = useState<TemplateType>();
@@ -71,9 +71,23 @@ const TemplatesPage = () => {
                                     </p>
                                 </td>
                                 <td className="border-blue-gray-50 border-b p-4">
-                                    <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
-                                        {item.values?.length || 0} prams
-                                    </p>
+                                    <ul className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">
+                                        <li>
+                                            <span>Vòng: </span>
+                                            {item.round == "ROUND_1" ? "1" : item.round === "ROUND_2" ? "2" : "3"}
+                                        </li>
+                                        <li>Tham số dành cho: {item.values?.length || 0}</li>
+                                        <li>
+                                            <span>Loại: </span>
+                                            {item.result === "PASSED" ? (
+                                                <span className="font-semibold text-green-500">Đạt</span>
+                                            ) : item.result === "FAILED" ? (
+                                                <span className="font-semibold text-red-500">Không đạt</span>
+                                            ) : (
+                                                <span className="text-gray-500">Khác</span>
+                                            )}
+                                        </li>
+                                    </ul>
                                 </td>
                                 <td className="border-blue-gray-50 border-b p-4">
                                     <p className="text-blue-gray-900 block font-sans text-sm leading-normal font-normal antialiased">

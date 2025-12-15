@@ -2,6 +2,8 @@ export interface TemplateType {
     id: string;
     name: string;
     subject: string;
+    round: keyof RoundType;
+    result: keyof ResultType;
     values: { [key: string]: string }[];
     status: boolean;
     pathName: string;
@@ -18,6 +20,15 @@ export interface TestSendMailRequest {
     phone: string;
     email: string;
 }
+export interface RoundType {
+    ROUND_1: string;
+    ROUND_2: string;
+    ROUND_3: string;
+}
+export interface ResultType {
+    PASSED: string;
+    FAILED: string;
+}
 export interface GetDetailTemplate {
     message: string;
     result: {
@@ -25,6 +36,8 @@ export interface GetDetailTemplate {
         name: string;
         pathName: string;
         subject: string;
+        round: RoundType;
+        result: ResultType;
         values: Array<{
             [key: string]: string;
         }>;

@@ -56,14 +56,16 @@ model LoginLog {
 }
 
 model EmailTemplate {
-  id        String   @id @default(uuid()) @db.Char(36)
-  name      String   @map("name") @db.VarChar(100)
-  pathName  String   @unique @map("path_name") @db.VarChar(100)
-  subject   String   @db.VarChar(255)
+  id        String     @id @default(uuid()) @db.Char(36)
+  name      String     @map("name") @db.VarChar(100)
+  pathName  String     @unique @map("path_name") @db.VarChar(100)
+  subject   String     @db.VarChar(255)
+  round     RoundType  @default(ROUND_1)
+  result    ResultType @default(PASSED)
   values    Json
-  status    Boolean  @default(false)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  status    Boolean    @default(false)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
 
   @@map("email_templates")
 }
@@ -78,7 +80,7 @@ model Settings {
 model ScoreResult {
   id          String    @id @default(uuid()) @db.Char(36)
   candidateId String    @unique @map("candidate_id")
-  round       RoundType @default(ROUND_REGISTER)
+  round       RoundType @default(ROUND_1)
   score       Json      @db.Json
   result      Status    @default(PENDING)
   createdAt   DateTime  @default(now()) @map("created_at")
@@ -95,8 +97,12 @@ enum Status {
 }
 
 enum RoundType {
-  ROUND_REGISTER
   ROUND_1
   ROUND_2
   ROUND_3
+}
+
+enum ResultType {
+  PASSED
+  FAILED
 }

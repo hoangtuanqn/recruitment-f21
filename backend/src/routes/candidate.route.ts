@@ -4,7 +4,9 @@ import multer from "multer";
 import * as candidateController from "~/controllers/candidates.controllers";
 import { confirmSendMailSchema, getAllCandidateQuerySchema } from "~/models/rules/candidate.schema";
 import { auth, isRole } from "~/middlewares/auth.middlewares";
-import prisma from "~/configs/prisma";
+
+import candidateService from "~/services/candidate.service";
+import { ResultType } from "~/constants/enums";
 
 const candidateRouter = Router();
 const upload = multer({ dest: "uploads/" });
@@ -27,7 +29,12 @@ candidateRouter.post(
 );
 candidateRouter.post("/create", auth, isRole(["ADMIN"]), upload.single("file"), candidateController.create);
 candidateRouter.get("/export-excel", auth, isRole(["ADMIN", "EDITOR"]), candidateController.exportExcel);
-candidateRouter.get("/send-email", candidateController.sendMail);
+// candidateRouter.get("/send-email", candidateController.sendMail);
+candidateRouter.get("/test", async (req: Request, res: Response) => {
+    await candidateService.sendMail(ResultType.FAILED);
+    return res.json({ message: "Hello World!" });
+});
+
 // const list = [
 //     {
 //         email: "chaukha017@gmail.com",

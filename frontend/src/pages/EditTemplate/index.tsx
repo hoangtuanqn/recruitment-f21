@@ -20,11 +20,14 @@ import {
 } from "~/components/ui/select";
 import axios from "axios";
 import { Trash2, Plus, Eye } from "lucide-react";
+import type { ResultType, RoundType } from "~/types/template.types";
 
 type TemplateInfoType = {
     name: string;
     subject: string;
     status: "1" | "0";
+    round: RoundType;
+    result: ResultType;
 };
 
 type TemplateParameter = {
@@ -41,6 +44,8 @@ const EditTemplate = () => {
         name: "",
         subject: "",
         status: "1",
+        round: "ROUND_1" as unknown as RoundType,
+        result: "PASSED" as unknown as ResultType,
     });
 
     const [templateFile, setTemplateFile] = useState<File | null>(null);
@@ -61,11 +66,18 @@ const EditTemplate = () => {
         if (templateDetail) {
             const template = templateDetail;
 
+            console.log("📥 Fetched template data:", template);
+
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setTemplateInfo({
                 name: template.name || "",
                 subject: template.subject || "",
                 status: template.status ? "1" : "0",
+                round: template.round || "ROUND_1",
+                result: template.result || "PASSED",
             });
+
+            console.log("✅ Updated templateInfo state");
 
             // Convert values array to parameters format
             if (template.values && Array.isArray(template.values)) {
@@ -109,10 +121,10 @@ const EditTemplate = () => {
         }
     };
 
-    const handleSelectChange = (value: string) => {
+    const handleSelectChange = (name: string, value: string) => {
         setTemplateInfo((prev) => ({
             ...prev,
-            status: value as "1" | "0",
+            [name]: value,
         }));
     };
 
@@ -135,6 +147,8 @@ const EditTemplate = () => {
             formData.append("name", templateInfo.name);
             formData.append("subject", templateInfo.subject);
             formData.append("status", templateInfo.status);
+            formData.append("round", `${templateInfo.round}`);
+            formData.append("result", `${templateInfo.result}`);
 
             // Convert parameters back to API format
             const apiParameters = parameters.map((param) => {
@@ -190,7 +204,8 @@ const EditTemplate = () => {
             </div>
         );
     }
-    console.log(templateInfo.status);
+
+    console.log("🔍 Current templateInfo:", templateInfo);
 
     return (
         <div className={"mx-auto"}>
@@ -252,17 +267,64 @@ const EditTemplate = () => {
                             </Field>
 
                             <Field>
+                                <FieldLabel htmlFor="round_select">Vòng</FieldLabel>
+                                <Select
+                                    key={`round-${templateInfo.round}`}
+                                    value={`${templateInfo.round}`}
+                                    name="round"
+                                    onValueChange={(value) => handleSelectChange("round", value)}
+                                >
+                                    <SelectTrigger className="w-full" id="round_select">
+                                        <SelectValue placeholder="Chọn vòng" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Chọn vòng</SelectLabel>
+                                            <SelectItem value="ROUND_1">Vòng 1</SelectItem>
+                                            <SelectItem value="ROUND_2">Vòng 2</SelectItem>
+                                            <SelectItem value="ROUND_3">Vòng 3</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </Field>
+
+                            <Field>
                                 <FieldLabel htmlFor="status_select">Trạng thái</FieldLabel>
-                                <Select name="status" onValueChange={handleSelectChange}>
+                                <Select
+                                    key={`status-${templateInfo.status}`}
+                                    value={templateInfo.status}
+                                    name="status"
+                                    onValueChange={(value) => handleSelectChange("status", value)}
+                                >
                                     <SelectTrigger className="w-full" id="status_select">
                                         <SelectValue placeholder="Chọn trạng thái" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectGroup>
+                                            <SelectLabel>Trạng thái</SelectLabel>
                                             <SelectItem value="1">Hoạt động</SelectItem>
-                                            <SelectItem value="0" defaultChecked>
-                                                Tạm dừng
-                                            </SelectItem>
+                                            <SelectItem value="0">Tạm dừng</SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel htmlFor="result_select">Kết quả</FieldLabel>
+                                <Select
+                                    key={`result-${templateInfo.result}`}
+                                    value={`${templateInfo.result}`}
+                                    name="result"
+                                    onValueChange={(value) => handleSelectChange("result", value)}
+                                >
+                                    <SelectTrigger className="w-full" id="result_select">
+                                        <SelectValue placeholder="Chọn kết quả" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>Kết quả</SelectLabel>
+                                            <SelectItem value="PASSED">Pass</SelectItem>
+                                            <SelectItem value="FAILED">Fail</SelectItem>
                                         </SelectGroup>
                                     </SelectContent>
                                 </Select>

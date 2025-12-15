@@ -13,6 +13,7 @@ import emailService from "./email.service";
 import emailTemplateRepository from "~/repositories/email-template.repository";
 import { EmailTemplateType } from "~/schemas/email-tempate";
 import settingRepository from "~/repositories/setting.repository";
+import { ResultType, RoundType } from "~/constants/enums";
 
 interface InfoTestEmailType {
     email: string;
@@ -122,11 +123,57 @@ class CandidateService {
         };
     };
 
-    public sendMail = async () => {
-        console.log("vô");
+    // public sendMail = async () => {
 
-        const infoTemplate = await this.getTemplateSendEmail();
-        const emails = await this.getInfoCandidates(infoTemplate as EmailTemplateType);
+    //     const infoTemplate = await this.getTemplateSendEmail();
+    //     const emails = await this.getInfoCandidates(infoTemplate as EmailTemplateType);
+
+    //     const emailLocked = await this.attemptBatchLock(Object.keys(emails));
+
+    //     const promises: Promise<void>[] = [];
+    //     for (let email of emailLocked) {
+    //         promises.push(
+    //             emailService.sendMail(email, emails[email].data, {
+    //                 subject: infoTemplate.subject!,
+    //                 pathName: infoTemplate.pathName,
+    //             }),
+    //         );
+    //     }
+    //     const results = await Promise.allSettled(promises);
+
+    //     const emailSendedSs: string[] = [],
+    //         unlockPromises: Promise<any>[] = [];
+
+    //     results.forEach((result, index) => {
+    //         const email = emailLocked[index];
+    //         const lockKey = `lock:${email}`;
+    //         if (result.status === "fulfilled") {
+    //             emailSendedSs.push(email);
+    //             console.log("Đã gửi email thành công đến: ", email);
+    //         } else {
+    //             const reason = result.reason as any;
+    //             console.error(`Gửi thất bại đến ${email}. Lỗi:`, reason?.message || reason);
+    //         }
+    //         unlockPromises.push(redisClient.del(lockKey));
+    //     });
+    //     await Promise.allSettled([...unlockPromises, candidateRepository.updateStatusSendMail(emailSendedSs)]);
+    //     console.log("Đã xử lý hoàn tất!");
+    // };
+
+    // private getTemplateSendEmail = async () => {
+    //     const infoTemplate = await emailTemplateRepository.getTemplateActive();
+    //     if (!infoTemplate) {
+    //         throw new ErrorWithStatus({
+    //             status: HTTP_STATUS.NOT_FOUND,
+    //             message: "Không tìm thấy template nào đang hoạt động"!,
+    //         });
+    //     }
+    //     return infoTemplate;
+    // };
+
+    public sendMail = async (result: ResultType) => {
+        const infoTemplate = await this.getTemplateSendEmail(result);
+        const emails = await this.getInfoCandidates(infoTemplate as EmailTemplateType, null, result);
 
         const emailLocked = await this.attemptBatchLock(Object.keys(emails));
 
@@ -160,8 +207,18 @@ class CandidateService {
         console.log("Đã xử lý hoàn tất!");
     };
 
-    private getTemplateSendEmail = async () => {
-        const infoTemplate = await emailTemplateRepository.getTemplateActive();
+    // private getTemplateSendEmail = async () => {
+    //     const infoTemplate = await emailTemplateRepository.getTemplate(RoundType.ROUND_1, ResultType.PASSED);
+    //     if (!infoTemplate) {
+    //         throw new ErrorWithStatus({
+    //             status: HTTP_STATUS.NOT_FOUND,
+    //             message: "Không tìm thấy template nào đang hoạt động"!,
+    //         });
+    //     }
+    //     return infoTemplate;
+    // };
+    private getTemplateSendEmail = async (result: ResultType) => {
+        const infoTemplate = await emailTemplateRepository.getTemplate(RoundType.ROUND_1, result);
         if (!infoTemplate) {
             throw new ErrorWithStatus({
                 status: HTTP_STATUS.NOT_FOUND,
@@ -171,10 +228,15 @@ class CandidateService {
         return infoTemplate;
     };
 
-    public getInfoCandidates = async (infoTemplate: EmailTemplateType, infoPerson: InfoTestEmailType | null = null) => {
+    public getInfoCandidates = async (
+        infoTemplate: EmailTemplateType,
+        infoPerson: InfoTestEmailType | null = null,
+        result: ResultType,
+    ) => {
         const emails = await (async function () {
             const emailAndInfo: { [key: string]: any } = {};
-            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(20);
+            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(40, result);
+            console.log(infoCandidate);
 
             infoCandidate.map((item) => item.email);
             infoCandidate.forEach((candi) => {

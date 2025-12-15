@@ -22,7 +22,7 @@ class ScoreResult {
     constructor(score: ScoreResultType) {
         this.id = score.id || uuidv7();
         this.candidateId = score.candidateId;
-        this.round = score.round || RoundType.ROUND_REGISTER;
+        this.round = score.round || RoundType.ROUND_1;
         this.score = score.score || "{}";
         this.result = score.result || SRT.PENDING;
         this.createdAt = score.createdAt || new Date();

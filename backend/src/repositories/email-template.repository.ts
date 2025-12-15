@@ -1,9 +1,11 @@
 import prisma from "~/configs/prisma";
-import { TemplateEditRequest } from "~/models/requests/template.requests";
+import { ResultType, RoundType } from "~/constants/enums";
 import EmailTemplate from "~/schemas/email-tempate";
 interface TemplateCreateType {
     name: string;
     subject: string;
+    round: RoundType;
+    result: ResultType;
     status: "1" | "0";
     path_name: string;
     values: any;
@@ -12,6 +14,15 @@ class EmailTemplateRepository {
     getTemplateActive = async () => {
         return prisma.emailTemplate.findFirst({
             where: { status: true },
+        });
+    };
+    getTemplate = async (round: RoundType, result: ResultType) => {
+        return prisma.emailTemplate.findFirst({
+            where: {
+                status: true,
+                round,
+                result,
+            },
         });
     };
     countActive = async () => {
@@ -23,11 +34,15 @@ class EmailTemplateRepository {
         return prisma.emailTemplate.findMany();
     };
     create = async (data: TemplateCreateType) => {
+        console.log("create template", data);
+
         console.log("có path name", data.path_name);
         return prisma.emailTemplate.create({
             data: new EmailTemplate({
                 name: data.name,
                 subject: data.subject,
+                round: data.round,
+                result: data.result,
                 values: data.values,
                 pathName: data.path_name,
                 status: data.status === "1",
@@ -44,6 +59,8 @@ class EmailTemplateRepository {
         const update = {
             name: payload.name,
             subject: payload.subject,
+            round: payload.round,
+            result: payload.result,
             values: payload.parameters,
             status: payload.status === "1",
         };

@@ -1,3 +1,4 @@
+import { ResultType } from "@prisma/client";
 import prisma from "~/configs/prisma";
 import { CandidateType } from "~/schemas/candidate.schema";
 import { paginate } from "~/utils/pagination";
@@ -80,10 +81,15 @@ class CandidateRepository {
         return result;
     };
 
-    getAnyEmail = async (qty: number) => {
+    getAnyEmail = async (qty: number, result: ResultType) => {
         return prisma.candidate.findMany({
             where: {
                 isSendMail: false,
+                scoreResults: {
+                    some: {
+                        result: result,
+                    },
+                },
             },
             take: qty,
             orderBy: {
