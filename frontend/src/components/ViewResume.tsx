@@ -1,8 +1,8 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
-import Swal from "sweetalert2";
-import Candidate from "~/api-requests/candidates";
-import { Button } from "~/components/ui/button";
+// import { useMutation, useQueryClient } from "@tanstack/react-query";
+// import axios from "axios";
+// import Swal from "sweetalert2";
+// import Candidate from "~/api-requests/candidates";
+// import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent } from "~/components/ui/dialog";
 
 export function ViewResume({
@@ -10,7 +10,7 @@ export function ViewResume({
     isOpenModal,
     setIsOpenModal,
     scores,
-    studentCode,
+    // studentCode,
 }: {
     url: string;
     isOpenModal: boolean;
@@ -18,42 +18,42 @@ export function ViewResume({
     scores?: { score: number }[];
     studentCode: string;
 }) {
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
 
-    const mutation = useMutation({
-        mutationFn: async (data: { studentCode: string; status: "PASSED" | "FAILED" }) => {
-            const result = await Candidate.changeStatus(data.studentCode, data.status);
-            return result.data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["candidate"] });
-            queryClient.invalidateQueries({ queryKey: ["stats"] });
-            setIsOpenModal(false);
-            Swal.fire({
-                title: "Success!",
-                text: "Status updated successfully!",
-                icon: "success",
-            });
-        },
-        onError: (error) => {
-            if (axios.isAxiosError(error)) {
-                Swal.fire({
-                    title: "Error!",
-                    text: error?.response?.data.message ?? "Failed to update status!",
-                    icon: "error",
-                });
-            }
-        },
-    });
+    // const mutation = useMutation({
+    //     mutationFn: async (data: { studentCode: string; status: "PASSED" | "FAILED" }) => {
+    //         const result = await Candidate.changeStatus(data.studentCode, data.status);
+    //         return result.data;
+    //     },
+    //     onSuccess: () => {
+    //         queryClient.invalidateQueries({ queryKey: ["candidate"] });
+    //         queryClient.invalidateQueries({ queryKey: ["stats"] });
+    //         setIsOpenModal(false);
+    //         Swal.fire({
+    //             title: "Success!",
+    //             text: "Status updated successfully!",
+    //             icon: "success",
+    //         });
+    //     },
+    //     onError: (error) => {
+    //         if (axios.isAxiosError(error)) {
+    //             Swal.fire({
+    //                 title: "Error!",
+    //                 text: error?.response?.data.message ?? "Failed to update status!",
+    //                 icon: "error",
+    //             });
+    //         }
+    //     },
+    // });
 
-    const handleStatusChange = (status: "PASSED" | "FAILED") => {
-        mutation.mutate({ studentCode, status });
-    };
+    // const handleStatusChange = (status: "PASSED" | "FAILED") => {
+    //     mutation.mutate({ studentCode, status });
+    // };
     return (
         <Dialog open={isOpenModal} onOpenChange={setIsOpenModal}>
             <DialogContent className="min-h-[90%] sm:max-w-[90%]">
                 <div className="flex h-full flex-col gap-4">
-                    <div className="flex gap-2">
+                    {/* <div className="flex gap-2">
                         <Button
                             className="bg-green-600 text-white hover:bg-green-700"
                             onClick={() => handleStatusChange("PASSED")}
@@ -68,7 +68,7 @@ export function ViewResume({
                         >
                             {mutation.isPending ? "Processing..." : "Fail"}
                         </Button>
-                    </div>
+                    </div> */}
                     <div>
                         <span>Điểm: </span>
                         <span className="ml-1 font-semibold">

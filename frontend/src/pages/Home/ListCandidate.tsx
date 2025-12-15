@@ -170,8 +170,7 @@ const ListCandidate = () => {
                             id="global-mail-switch"
                             checked={isActivated}
                             onCheckedChange={handleToggleGlobalStatus}
-                            // disabled={isChangingStatus}
-                            disabled={true}
+                            disabled={isChangingStatus}
                         />
                         <Label
                             htmlFor="global-mail-switch"
@@ -240,7 +239,9 @@ const ListCandidate = () => {
                                             <li className="text-xs">Phone: {item.phone || "Đã ẩn"}</li>
                                             <li className="text-xs">
                                                 Gửi mail:{" "}
-                                                {item.isSendMail ? (
+                                                {!item.scoreResults?.[0]?.result ? (
+                                                    <span className="font-medium text-red-600">Không gửi</span>
+                                                ) : item.isSendMail ? (
                                                     <span className="font-medium text-green-600">Đã gửi</span>
                                                 ) : (
                                                     <span className="font-medium text-yellow-600">Chờ</span>
@@ -293,8 +294,27 @@ const ListCandidate = () => {
                                     )}
                                 </td>
                                 <td className="border-blue-gray-50 border-b p-4">
-                                    {item.scoreResults?.[0]?.result == "PENDING" && (
+                                    <div className="flex flex-col gap-2">
                                         <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="w-fit justify-start gap-2"
+                                            onClick={() => {
+                                                setIsOpenModal(true);
+                                                setDataResume({
+                                                    urlResume: `/resume/${item.studentCode}/first_submit.pdf`,
+                                                    scores: item.scoreResults?.[0]?.score || [],
+                                                    studentCode: item.studentCode,
+                                                });
+                                            }}
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                            <span className="text-xs">Résumé lần đầu</span>
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="w-fit justify-start gap-2"
                                             onClick={() => {
                                                 setIsOpenModal(true);
                                                 setDataResume({
@@ -304,10 +324,10 @@ const ListCandidate = () => {
                                                 });
                                             }}
                                         >
-                                            <Eye />
-                                            Xem
+                                            <Eye className="h-4 w-4" />
+                                            <span className="text-xs">Résumé lần cuối</span>
                                         </Button>
-                                    )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}

@@ -1,10 +1,9 @@
-import Stats from "~/components/Stats";
 import ListCandidate from "./ListCandidate";
 
 const HomePage = () => {
     return (
         <section>
-            <Stats />
+            {/* <Stats /> */}
             <ListCandidate />
         </section>
     );

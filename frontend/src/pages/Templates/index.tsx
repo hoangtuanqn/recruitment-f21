@@ -76,7 +76,7 @@ const TemplatesPage = () => {
                                             <span>Vòng: </span>
                                             {item.round == "ROUND_1" ? "1" : item.round === "ROUND_2" ? "2" : "3"}
                                         </li>
-                                        <li>Tham số dành cho: {item.values?.length || 0}</li>
+                                        <li>Tham số: {item.values?.length || 0}</li>
                                         <li>
                                             <span>Loại: </span>
                                             {item.result === "PASSED" ? (
