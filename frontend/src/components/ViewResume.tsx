@@ -70,7 +70,7 @@ export function ViewResume({
                         </Button>
                     </div> */}
                     <div>
-                        <span>Điểm: </span>
+                        <span>Điểm đánh giá qua các lần nộp: </span>
                         <span className="ml-1 font-semibold">
                             {scores?.map((s: { score: number }) => (
                                 <span className={`mr-1 ${s.score < 50 ? `text-red-600` : `text-green-600`}`}>

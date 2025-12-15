@@ -40,6 +40,14 @@ const TemplatesPage = () => {
             <Link to="/add-template">
                 <Button variant={"default"}>Thêm template</Button>
             </Link>
+            <div>
+                <span className="mt-2 block text-sm font-bold italic">
+                    [UPDATE]: Có thể bật 2 template hoạt động cùng lúc. Email sẽ được gửi song song cho các ứng viên.
+                </span>
+                <span className="mt-2 block text-sm font-bold italic">
+                    (Trong đó: 1 template thuộc loại "Đạt", 1 template thuộc loại "Không đạt")
+                </span>
+            </div>
             <div className="relative mt-5 flex h-full w-full flex-col overflow-auto rounded-xl bg-white bg-clip-border text-gray-700 shadow-md">
                 <table className="w-full min-w-max table-auto text-left">
                     <thead>

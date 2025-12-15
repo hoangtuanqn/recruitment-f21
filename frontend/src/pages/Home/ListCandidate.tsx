@@ -295,38 +295,42 @@ const ListCandidate = () => {
                                 </td>
                                 <td className="border-blue-gray-50 border-b p-4">
                                     <div className="flex flex-col gap-2">
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="w-fit justify-start gap-2"
-                                            onClick={() => {
-                                                setIsOpenModal(true);
-                                                setDataResume({
-                                                    urlResume: `/resume/${item.studentCode}/first_submit.pdf`,
-                                                    scores: item.scoreResults?.[0]?.score || [],
-                                                    studentCode: item.studentCode,
-                                                });
-                                            }}
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                            <span className="text-xs">Résumé lần đầu</span>
-                                        </Button>
-                                        <Button
-                                            size="sm"
-                                            variant="outline"
-                                            className="w-fit justify-start gap-2"
-                                            onClick={() => {
-                                                setIsOpenModal(true);
-                                                setDataResume({
-                                                    urlResume: `/resume/${item.studentCode}/last_submit.pdf`,
-                                                    scores: item.scoreResults?.[0]?.score || [],
-                                                    studentCode: item.studentCode,
-                                                });
-                                            }}
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                            <span className="text-xs">Résumé lần cuối</span>
-                                        </Button>
+                                        {item.scoreResults?.[0]?.score?.length > 0 && (
+                                            <>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="w-fit justify-start gap-2"
+                                                    onClick={() => {
+                                                        setIsOpenModal(true);
+                                                        setDataResume({
+                                                            urlResume: `/resume/${item.studentCode}/first_submit.pdf`,
+                                                            scores: item.scoreResults?.[0]?.score || [],
+                                                            studentCode: item.studentCode,
+                                                        });
+                                                    }}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    <span className="text-xs">Résumé lần đầu</span>
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="w-fit justify-start gap-2"
+                                                    onClick={() => {
+                                                        setIsOpenModal(true);
+                                                        setDataResume({
+                                                            urlResume: `/resume/${item.studentCode}/last_submit.pdf`,
+                                                            scores: item.scoreResults?.[0]?.score || [],
+                                                            studentCode: item.studentCode,
+                                                        });
+                                                    }}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                    <span className="text-xs">Résumé lần cuối</span>
+                                                </Button>
+                                            </>
+                                        )}
                                     </div>
                                 </td>
                             </tr>
