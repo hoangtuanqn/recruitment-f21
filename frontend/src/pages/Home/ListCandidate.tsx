@@ -18,28 +18,8 @@ import {
 import Template from "~/api-requests/template";
 import { Switch } from "~/components/ui/switch";
 import { Label } from "~/components/ui/label";
-import type { ScoreResultsType } from "~/types/candidate.types";
 import { ViewResume } from "~/components/ViewResume";
 const columns = ["Mã SV / Kỳ", "Họ tên", "Thông tin", "Điểm & Trạng thái", "Action"];
-
-// Helper function to calculate average score
-const calculateAverageScore = (scoreResults: ScoreResultsType[]) => {
-    if (!scoreResults || scoreResults.length === 0) return 0;
-
-    let totalScore = 0;
-    let scoreCount = 0;
-
-    scoreResults.forEach((result) => {
-        if (result.score && Array.isArray(result.score)) {
-            result.score.forEach((s: { score: number }) => {
-                totalScore += s.score;
-                scoreCount++;
-            });
-        }
-    });
-
-    return scoreCount > 0 ? (totalScore / scoreCount).toFixed(2) : 0;
-};
 
 const ListCandidate = () => {
     const queryClient = useQueryClient();
@@ -247,30 +227,26 @@ const ListCandidate = () => {
                                                     <span className="font-medium text-yellow-600">Chờ</span>
                                                 )}
                                             </li>
-                                            <li className="text-xs">
-                                                Kết quả Vòng 1:{" "}
-                                                {item.scoreResults?.[0]?.result === "PENDING" ? (
-                                                    <span className="font-medium text-yellow-600">Chờ chấm</span>
-                                                ) : item.scoreResults?.[0]?.result === "PASSED" ? (
-                                                    <span className="font-medium text-green-600">Passed</span>
-                                                ) : item.scoreResults?.[0]?.result === "FAILED" ? (
-                                                    <span className="font-medium text-red-600">Failed</span>
-                                                ) : (
-                                                    <span className="font-medium text-red-600">Failed</span>
-                                                )}
-                                            </li>
-                                            <li className="text-xs">
-                                                Kết quả Vòng 2:{" "}
-                                                {item.scoreResults?.[1]?.result === "PENDING" ? (
-                                                    <span className="font-medium text-yellow-600">Chờ chấm</span>
-                                                ) : item.scoreResults?.[1]?.result === "PASSED" ? (
-                                                    <span className="font-medium text-green-600">Passed</span>
-                                                ) : item.scoreResults?.[1]?.result === "FAILED" ? (
-                                                    <span className="font-medium text-red-600">Failed</span>
-                                                ) : (
-                                                    <span className="font-medium text-red-600">Failed</span>
-                                                )}
-                                            </li>
+                                            {item.scoreResults.map((sr) => (
+                                                <li className="text-xs">
+                                                    Kết quả{" "}
+                                                    {sr.round == "ROUND_1"
+                                                        ? "Vòng 1"
+                                                        : sr.round == "ROUND_2"
+                                                          ? "Vòng 2"
+                                                          : "Vòng 3"}
+                                                    :{" "}
+                                                    {sr.result === "PENDING" ? (
+                                                        <span className="font-medium text-yellow-600">Chờ chấm</span>
+                                                    ) : sr.result === "PASSED" ? (
+                                                        <span className="font-medium text-green-600">Passed</span>
+                                                    ) : sr.result === "FAILED" ? (
+                                                        <span className="font-medium text-red-600">Failed</span>
+                                                    ) : (
+                                                        <span className="font-medium text-red-600">Failed</span>
+                                                    )}
+                                                </li>
+                                            ))}
                                         </ul>
                                     </div>
                                 </td>

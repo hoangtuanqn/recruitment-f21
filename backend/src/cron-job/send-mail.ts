@@ -2,7 +2,7 @@ import cron from "node-cron";
 import { ResultType } from "~/constants/enums";
 import settingRepository from "~/repositories/setting.repository";
 import candidateService from "~/services/candidate.service";
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("*/2 * * * * *", async () => {
     try {
         if ((await settingRepository.get("send_mail_auto"))?.value === "1") {
             // console.log("lọt vô nè");
@@ -10,7 +10,7 @@ cron.schedule("*/1 * * * *", async () => {
                 candidateService.sendMail(ResultType.PASSED),
                 candidateService.sendMail(ResultType.FAILED),
             ]);
-            // await candidateService.sendMail(ResultType.PASSED);
+            // await candidateService.sendMail(ResultType.FAILED);
         } else {
             console.log("Chưa kích hoạt tính năng send email!");
         }

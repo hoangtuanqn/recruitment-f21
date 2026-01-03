@@ -11,6 +11,7 @@ type CandidateScore = {
     fullName: string;
     studentCode: string;
     score: number;
+    result: "Pass" | "Fail" | string;
 };
 class ScoreService {
     // data cũ có dạng: nguyenthanhtrieta@gmail.com,40,ROUND_1
@@ -47,7 +48,7 @@ class ScoreService {
                             finalSubmit: "",
                             candidateId: candidateUUID,
                             round: "ROUND_2",
-                            result: "PASSED",
+                            result: candidate.result.trim() === "Pass" ? "PASSED" : "FAILED",
                             score: candidateScore,
                         },
                     });
@@ -77,6 +78,7 @@ class ScoreService {
                     fullName: splitTab[0],
                     studentCode: splitTab[1],
                     score: Number(splitTab[2]),
+                    result: splitTab[3],
                 });
             }
             // console.log("candidates >> candidates", candidates.length);

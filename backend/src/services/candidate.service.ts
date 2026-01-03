@@ -174,7 +174,8 @@ class CandidateService {
     public sendMail = async (result: ResultType) => {
         const infoTemplate = await this.getTemplateSendEmail(result);
         const emails = await this.getInfoCandidates(infoTemplate as EmailTemplateType, null, result);
-
+        // console.log("Object.keys(emails)", Object.keys(emails).length);
+        // return;
         const emailLocked = await this.attemptBatchLock(Object.keys(emails));
 
         const promises: Promise<void>[] = [];
@@ -218,7 +219,8 @@ class CandidateService {
     //     return infoTemplate;
     // };
     private getTemplateSendEmail = async (result: ResultType) => {
-        const infoTemplate = await emailTemplateRepository.getTemplate(RoundType.ROUND_1, result);
+        // nhớ đổi lại template nữa nhé
+        const infoTemplate = await emailTemplateRepository.getTemplate(RoundType.ROUND_2, result);
         if (!infoTemplate) {
             throw new ErrorWithStatus({
                 status: HTTP_STATUS.NOT_FOUND,
