@@ -187,6 +187,7 @@ class CandidateService {
                 }),
             );
         }
+        console.log("Đã chuẩn bị gửi maillll");
         const results = await Promise.allSettled(promises);
 
         const emailSendedSs: string[] = [],

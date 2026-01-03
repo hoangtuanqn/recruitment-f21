@@ -124,9 +124,10 @@ class CandidateRepository {
         });
     };
     changeStatus = async (id: string, status: "PASSED" | "FAILED") => {
-        return prisma.scoreResult.update({
+        return prisma.scoreResult.updateMany({
             where: {
                 candidateId: id,
+                round: "ROUND_2",
             },
             data: {
                 result: status,
