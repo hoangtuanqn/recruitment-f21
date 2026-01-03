@@ -196,7 +196,7 @@ class CandidateService {
             const lockKey = `lock:${email}`;
             if (result.status === "fulfilled") {
                 emailSendedSs.push(email);
-                console.log("Đã gửi email thành công đến: ", email);
+                console.log("Đã gửi email thành công đến: ", email, " voi ket qua ", result);
             } else {
                 const reason = result.reason as any;
                 console.error(`Gửi thất bại đến ${email}. Lỗi:`, reason?.message || reason);
@@ -235,7 +235,7 @@ class CandidateService {
     ) => {
         const emails = await (async function () {
             const emailAndInfo: { [key: string]: any } = {};
-            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(100, result);
+            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(10, result);
             // console.log(infoCandidate);
 
             infoCandidate.map((item) => item.email);
