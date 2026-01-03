@@ -6,7 +6,13 @@ import { paginate } from "~/utils/pagination";
 class CandidateRepository {
     getCandidates = async (page: number = 1, limit: number = 20) => {
         const result = await paginate<any>(prisma.candidate, {
-            where: {},
+            // where: {
+            //     scoreResults: {
+            //         some: {
+            //             result: "PASSED",
+            //         },
+            //     },
+            // },
             page,
             limit,
             orderBy: [
@@ -26,14 +32,12 @@ class CandidateRepository {
         });
         return result;
     };
-    findByStudentCode = async (studentCode: string) => {
-        const result = await prisma.candidate.findUnique({
+    findByStudentCode = (studentCode: string) => {
+        return prisma.candidate.findUnique({
             where: {
                 studentCode,
             },
         });
-
-        return result;
     };
     createMany = async (data: CandidateType[]) => {
         const result = await prisma.candidate.createMany({
@@ -88,6 +92,7 @@ class CandidateRepository {
                 scoreResults: {
                     some: {
                         result: result,
+                        round: "ROUND_2",
                     },
                 },
             },

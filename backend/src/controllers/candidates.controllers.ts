@@ -91,15 +91,42 @@ export const exportExcel = async (req: Request, res: Response, next: NextFunctio
         { header: "Email", key: "email", width: 40 },
         { header: "Student Code", key: "studentCode", width: 15 },
         { header: "Major", key: "major", width: 30 },
-        { header: "Score 1", key: "score_1", width: 40 },
-        { header: "Score 2", key: "score_2", width: 40 },
-        { header: "Score 3", key: "score_3", width: 40 },
-        { header: "Score 4", key: "score_4", width: 40 },
-        { header: "Score 5", key: "score_5", width: 40 },
-        { header: "Average Score", key: "averageScore", width: 40 },
+        { header: "Semester", key: "semester", width: 30 },
+
+        { header: "Score 1", key: "score1", width: 10 },
+        { header: "Score 2", key: "score2", width: 10 },
+        { header: "Score 3", key: "score3", width: 10 },
+        { header: "Score 4", key: "score4", width: 10 },
+        { header: "Score 5", key: "score5", width: 10 },
+        { header: "Trung bình ", key: "averageScore", width: 10 },
+        { header: "Lần nộp", key: "submissionCount", width: 10 },
+        { header: "Kết quả", key: "result", width: 20 },
+        { header: "Résumé lần đầu", key: "firstSubmit", width: 20 },
+        { header: "Résumé lần cuối", key: "finalSubmit", width: 20 },
     ]);
     const data = await candidateService.getAll(+page || 1, +limit || 20);
-    workbook.setupData(data.data);
+    const dataNew = data.data.map((item) => {
+        const score = {
+            score1: item.scoreResults[0]?.score?.[0]?.score || 0,
+            score2: item.scoreResults[0]?.score?.[1]?.score || 0,
+            score3: item.scoreResults[0]?.score?.[2]?.score || 0,
+            score4: item.scoreResults[0]?.score?.[3]?.score || 0,
+            score5: item.scoreResults[0]?.score?.[4]?.score || 0,
+        };
+        const averageScore =
+            ((score.score1 + score.score2 + score.score3 + score.score4 + score.score5) * 1.0) /
+            (item.scoreResults[0]?.score?.length ?? 1);
+        return {
+            ...item,
+            ...score,
+            averageScore: averageScore.toFixed(2),
+            submissionCount: item.scoreResults[0]?.score?.length || 0,
+            result: item.scoreResults[0]?.result || "FAILED",
+            firstSubmit: item.scoreResults[0]?.firstSubmit,
+            finalSubmit: item.scoreResults[0]?.finalSubmit,
+        };
+    });
+    workbook.setupData(dataNew);
 
     workbook.setHeader(res);
 

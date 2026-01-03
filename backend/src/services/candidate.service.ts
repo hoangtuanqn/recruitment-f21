@@ -235,8 +235,8 @@ class CandidateService {
     ) => {
         const emails = await (async function () {
             const emailAndInfo: { [key: string]: any } = {};
-            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(20, result);
-            console.log(infoCandidate);
+            const infoCandidate = infoPerson ? [infoPerson] : await candidateRepository.getAnyEmail(100, result);
+            // console.log(infoCandidate);
 
             infoCandidate.map((item) => item.email);
             infoCandidate.forEach((candi) => {

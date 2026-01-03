@@ -259,21 +259,30 @@ const ListCandidate = () => {
                                                     <span className="font-medium text-red-600">Failed</span>
                                                 )}
                                             </li>
+                                            <li className="text-xs">
+                                                Kết quả Vòng 2:{" "}
+                                                {item.scoreResults?.[1]?.result === "PENDING" ? (
+                                                    <span className="font-medium text-yellow-600">Chờ chấm</span>
+                                                ) : item.scoreResults?.[1]?.result === "PASSED" ? (
+                                                    <span className="font-medium text-green-600">Passed</span>
+                                                ) : item.scoreResults?.[1]?.result === "FAILED" ? (
+                                                    <span className="font-medium text-red-600">Failed</span>
+                                                ) : (
+                                                    <span className="font-medium text-red-600">Failed</span>
+                                                )}
+                                            </li>
                                         </ul>
                                     </div>
                                 </td>
                                 <td className="border-blue-gray-50 border-b p-4">
                                     {item.scoreResults && item.scoreResults.length > 0 ? (
                                         <div className="text-sm">
-                                            <div className="mb-2 flex items-center gap-2">
-                                                <p className="font-bold">
-                                                    TB: {calculateAverageScore(item.scoreResults)}
-                                                </p>
-                                            </div>
                                             <div className="space-y-1">
                                                 {item.scoreResults.map((sr) => (
                                                     <div key={sr.id} className="text-xs">
-                                                        <span className="font-medium">Điểm:</span>
+                                                        <span className="font-medium">
+                                                            Điểm {sr.round === "ROUND_1" ? "V1" : "V2"}:
+                                                        </span>
                                                         <span className="ml-1 font-semibold">
                                                             {sr.score.map((s: { score: number }) => (
                                                                 <span

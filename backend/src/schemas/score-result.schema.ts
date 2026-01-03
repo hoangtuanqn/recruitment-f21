@@ -7,6 +7,8 @@ interface ScoreResultType {
     round: RoundType;
     score: JSON;
     result?: SRT;
+    firstSubmit?: string;
+    finalSubmit?: string;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -17,14 +19,19 @@ class ScoreResult {
     round: RoundType;
     score: JSON;
     result?: SRT;
+    firstSubmit: string;
+    finalSubmit: string;
     createdAt: Date;
     updatedAt: Date;
+
     constructor(score: ScoreResultType) {
         this.id = score.id || uuidv7();
         this.candidateId = score.candidateId;
         this.round = score.round || RoundType.ROUND_1;
         this.score = score.score || "{}";
         this.result = score.result || SRT.PENDING;
+        this.firstSubmit = score.firstSubmit || "";
+        this.finalSubmit = score.finalSubmit || "";
         this.createdAt = score.createdAt || new Date();
         this.updatedAt = score.updatedAt || new Date();
     }

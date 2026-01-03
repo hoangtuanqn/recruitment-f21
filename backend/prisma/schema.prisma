@@ -79,13 +79,15 @@ model Settings {
 
 model ScoreResult {
   id          String    @id @default(uuid()) @db.Char(36)
-  candidateId String    @unique @map("candidate_id")
+  candidateId String    @map("candidate_id")
   round       RoundType @default(ROUND_1)
   score       Json      @db.Json
   result      Status    @default(PENDING)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  firstSubmit String    @map("first_submit") @db.VarChar(255)
+  finalSubmit String    @map("final_submit") @db.VarChar(255)
 
   @@map("score_results")
 }
